@@ -3,3 +3,5 @@ torch
 accelerate
 transformers
 git+https://github.com/huggingface/diffusers
+
+Django
