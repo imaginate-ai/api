@@ -4,4 +4,6 @@ accelerate
 transformers
 git+https://github.com/huggingface/diffusers
 
-Django
+Flask
+pymongo
+python-dotenv
