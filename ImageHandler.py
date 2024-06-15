@@ -6,14 +6,20 @@ import threading
 from typing import Union
 import PIL 
 import torch
+from enum import Enum
 
 # Suppress saftey warnings and pipeline downloads
 with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
     from diffusers import AutoPipelineForText2Image, StableDiffusionInstructPix2PixPipeline, EulerAncestralDiscreteScheduler
 
 
+class DataType(Enum):
+    IMAGE = "image"
+    PROMPT = "prompt"
+
 class ImageHandler:
     
+
     def __init__(self):
         # provide support for both cuda and cpu
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -46,6 +52,7 @@ class ImageHandler:
             self.thread.daemon = True
             self.thread.start()
 
+
     # Function to get image from url
     def get_image_from_url(self, url: str) -> PIL.Image.Image:
         image = PIL.Image.open(requests.get(url, stream=True).raw)
@@ -53,55 +60,62 @@ class ImageHandler:
         image = image.convert("RGB")
         return image
     
+
     # Function to add image to image task to queue
-    def enqueue_image_to_image(self, init_image: Union[PIL.Image.Image, str], prompt = 'make photograph', num_inference_steps=None, guidance_scale=None):
-        if isinstance(init_image, str):
-            init_image = self.get_image_from_url(init_image)
+    def enqueue_image_to_image(
+        self, 
+        image: Union[PIL.Image.Image, str], 
+        prompt = 'make photograph', 
+        num_inference_steps=None, 
+        image_guidance_scale=None
+    ):
+        
+        if isinstance(image, str):
+            image = self.get_image_from_url(image)
+        kwargs = {k: v for k, v in locals().items() if v and v is not self}
 
-        kwargs = {'image': init_image, 'prompt': prompt}
-
-        if num_inference_steps is not None:
-            kwargs['num_inference_steps'] = num_inference_steps
-        if guidance_scale is not None:
-            kwargs['image_guidance_scale'] = guidance_scale
-
-        task = {'type': 'image', 'kwargs': kwargs}
+        task = {'type': DataType.IMAGE, 'kwargs': kwargs}
         self.queue.put(task)
         print(f"\nEnqueued: {prompt}")
 
-    # Function to add text to image task to queue
-    def enqueue_prompt_to_image(self, prompt: str, negative_prompt = None, num_inference_steps=None, guidance_scale=None) -> PIL.Image.Image:
-        kwargs = {'prompt': prompt}
-        if negative_prompt is not None:
-            kwargs['negative_prompt'] = negative_prompt
-        if num_inference_steps is not None:
-            kwargs['num_inference_steps'] = num_inference_steps
-        if guidance_scale is not None:
-            kwargs['guidance_scale'] = guidance_scale
 
-        task = {'type': 'prompt', 'kwargs': kwargs}
+    # Function to add text to image task to queue
+    def enqueue_prompt_to_image(
+        self, 
+        prompt: str, 
+        negative_prompt = None, 
+        num_inference_steps=None, 
+        guidance_scale=None
+    ):
+        
+        kwargs = {k: v for k, v in locals().items() if v and v is not self}
+
+        task = {'type': DataType.PROMPT, 'kwargs': kwargs}
         self.queue.put(task)
         print(f"\nEnqueued: {prompt}")
     
+
     # Continuously process the queue
     def _process_queue(self):
         while True:
             task = self.queue.get()
-            if task is None:
+            if task:
+                print(f"\nDequeued: {task['kwargs']['prompt']}")
+                self.process(task)
+                self.queue.task_done()
+            else:
                 break
 
-            print(f"\nDequeued: {task['kwargs']['prompt']}")
-            self.process(task)
-            self.queue.task_done()
-    
+
     # Process the task
     def process(self, item):
-        if item['type'] == 'image':
+        if item['type'] == DataType.IMAGE:
             image = self.image_pipe(**item['kwargs']).images[0]
-        elif item['type'] == 'prompt':
+        elif item['type'] == DataType.PROMPT:
             image = self.text_pipe(**item['kwargs']).images[0]
 
         image.show()
+
 
     # Stop processing the queue, wait for all tasks to finish
     def stop_processing(self):

@@ -5,7 +5,7 @@ image_handler = ImageHandler()
 def example():
     # image 1
     url = ('https://raw.githubusercontent.com/timothybrooks/instruct-pix2pix/main/imgs/example.jpg')
-    image_handler.enqueue_image_to_image(init_image=url, prompt='turn him into a cyborg', num_inference_steps=10, guidance_scale=1)
+    image_handler.enqueue_image_to_image(image=url, prompt='turn him into a cyborg', num_inference_steps=10, image_guidance_scale=1)
 
     # image 2
     prompt = (
@@ -18,9 +18,7 @@ def example():
 
     # image 3
     prompt = (
-        """
-        Generate an image of a bowl of fancy soup. The soup should be presented elegantly in a clean and minimalist style. The bowl should be made of white porcelain and placed on a wooden table. The soup should be a creamy texture, with a vibrant orange color. Garnish the soup with a sprinkle of fresh chives and a swirl of high-quality olive oil on the surface.
-        """
+        "Generate an image of a bowl of fancy soup. The soup should be presented elegantly in a clean and minimalist style. The bowl should be made of white porcelain and placed on a wooden table. The soup should be a creamy texture, with a vibrant orange color. Garnish the soup with a sprinkle of fresh chives and a swirl of high-quality olive oil on the surface."
     )
     image_handler.enqueue_prompt_to_image(prompt=prompt, guidance_scale=10)
 
