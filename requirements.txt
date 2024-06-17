@@ -6,5 +6,7 @@ torchvision==0.18.1+cu121
 requests
 accelerate
 transformers
-diffusers @ git+https://github.com/huggingface/diffusers@1d9a6a81b9a00b2dfab992ba75eb55bf8afb4eae
-Django
+git+https://github.com/huggingface/diffusers
+Flask
+pymongo
+python-dotenv
