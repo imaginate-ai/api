@@ -33,12 +33,12 @@ def search_id(_id: ObjectId):
 
 # Helper function to build schema-matching JSON response
 def build_result(_id: ObjectId, real: bool, date: int, theme: str):
-    return jsonify({
+    return {
         "url": "/read/" + str(_id),
         "real": real,
         "date": date,
         "theme": theme
-    })
+    }
 
 # Initialize clients
 app = Flask(__name__)
@@ -88,7 +88,7 @@ def upload():
 
     _id = fs.put(file.stream.read(), filename=file.filename, type=file.content_type,
                  date=date, theme=theme, real=real)
-    return build_result(_id, real, date, theme)
+    return jsonify(build_result(_id, real, date, theme))
 
 # GET /read/<id>: used for viewing a specific image 
 @app.route("/read/<id>")
@@ -106,7 +106,29 @@ def read(id):
 def read_properties(id):
     _id = validate_id(id)
     res = search_id(_id)
-    return build_result(res._id, res.real, res.date, res.theme)
+    return jsonify(build_result(res._id, res.real, res.date, res.theme))
+
+# GET /date/<day>/images: used for viewing images of a specified date
+@app.route("/date/<day>/images")
+def images_by_date(day):
+    try:
+        day = int(day)
+    except ValueError:
+        abort(400, description="Invalid date")
+    
+    res = fs.find({"date": day})
+    out = []
+    for document in res:
+        out.append(build_result(document._id, document.real, document.date, document.theme))
+    return jsonify(out)
+
+# GET /date/latest: used for getting the latest date in the database
+@app.route("/date/latest")
+def latest_date():
+    res = next(fs.find().sort({"date": -1}), None) # Descending sort 
+    if not res:
+        abort(400, description="Empty database")
+    return jsonify({"date": res.date})
 
 # Read endpoint
 if __name__ == "__main__":
