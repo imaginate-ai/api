@@ -5,7 +5,7 @@ from PIL import Image
 import requests
 
 from imaginate_api.image_handler import ImageHandler, DataType
-from schemas.image_info import ImageInfo
+from imaginate_api.schemas.image_info import ImageInfo
 import io
 
 

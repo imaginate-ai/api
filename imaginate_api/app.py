@@ -20,7 +20,9 @@ def str_to_bool(string: str):
 
 
 # Helper function to validate MongoDB ID
-def validate_id(image_id: str | ObjectId | bytes | None):
+def validate_id(image_id: str | ObjectId | bytes):
+  if not image_id:
+    abort(400, "Missing ID")
   try:
     _id = ObjectId(image_id)
   except (InvalidId, TypeError):
@@ -32,7 +34,7 @@ def validate_id(image_id: str | ObjectId | bytes | None):
 def search_id(_id: ObjectId):
   res = next(fs.find({"_id": _id}), None)
   if not res:
-    abort(404, "Collection not found")
+    abort(400, "Collection not found")
   return res
 
 
@@ -116,8 +118,8 @@ def upload():
 
 # GET /read/<id>: used for viewing a specific image
 @app.route("/image/read/<id>")
-def read(image_id):
-  _id = validate_id(image_id)
+def read(id):
+  _id = validate_id(id)
   res = search_id(_id)
 
   response = make_response(res.read())
@@ -128,8 +130,8 @@ def read(image_id):
 
 # GET /read/<id>: used for viewing a specific image
 @app.route("/image/read/<id>/properties")
-def read_properties(image_id):
-  _id = validate_id(image_id)
+def read_properties(id):
+  _id = validate_id(id)
   res = search_id(_id)
   return jsonify(build_result(res._id, res.real, res.date, res.theme, res.status))
 
@@ -160,7 +162,8 @@ def images_by_date(day):
 # GET /date/latest: used for getting the latest date in the database
 @app.route("/date/latest")
 def latest_date():
-  res = next(fs.find().sort({"date": -1}), None)  # Descending sort
+  # Explanation for this query: https://www.mongodb.com/docs/manual/core/aggregation-pipeline-optimization/#-sort----limit-coalescence
+  res = next(fs.find().sort({"date": -1}).limit(1), None)  # Descending sort
   if not res:
     abort(400, description="Empty database")
   return jsonify({"date": res.date})
@@ -168,8 +171,8 @@ def latest_date():
 
 # DELETE /delete/<id>: used for deleting a single image
 @app.route("/image/<id>", methods=["DELETE"])
-def delete_image(image_id):
-  _id = validate_id(image_id)
+def delete_image(id):
+  _id = validate_id(id)
   res = search_id(_id)
 
   res_real = getattr(res, "real", None)
@@ -182,6 +185,6 @@ def delete_image(image_id):
   return info
 
 
-# Read endpoint
+# Run app on invocation
 if __name__ == "__main__":
   app.run()
