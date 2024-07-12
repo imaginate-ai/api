@@ -10,3 +10,5 @@ git+https://github.com/huggingface/diffusers
 Flask
 pymongo
 python-dotenv
+marshmallow
+aws-lambda-powertools
