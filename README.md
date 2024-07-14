@@ -1,5 +1,5 @@
 ### Working with the virtual environment
-- Creating the environment: `python -m venv venv`
-- Entering the environment: `./venv/Scripts/activate`
-- Leaving the environment: `deactivate`
-- Installing libraries in the environment: `pip install -r requirements.txt`
+- Creating the environment: `make local-setup`
+- Entering the environment: `poetry shell`
+- Leaving the environment: `exit`
+- Installing libraries in the environment: `make install`

@@ -2,8 +2,11 @@
 name = "imaginate-api"
 version = "0.1.0"
 description = "Imaginate API"
-authors = ["Nathan <probysuper8@gmail.com>"]
+authors = [
+  "Nathan <probysuper8@gmail.com>",
+  "Faisal <faisalfawad2004@gmail.com>"]
 readme = "README.md"
+repository = "https://github.com/zachale/imaginate-api"
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -23,6 +26,7 @@ accelerate = "^0.32.0"
 pre-commit = "^3.7.1"
 pylint = "^3.2.5"
 pytest = "^8.2.2"
+mongomock = "^4.1.2"
 
 [tool.ruff]
 exclude = []
