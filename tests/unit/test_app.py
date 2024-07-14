@@ -135,7 +135,7 @@ def test_get_root_endpoint():
 
 
 # Not testing as this endpoint will likely be removed in future
-def test_get_image_read_endpoint():
+def test_get_image_read_all_endpoint():
     pass
 
 
