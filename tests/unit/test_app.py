@@ -215,3 +215,18 @@ def test_get_date_latest_endpoint_exception(client):
         mock_find.return_value.sort.return_value.limit.return_value = data
         res = client.get("date/latest")
         assert res.status_code == HTTPStatus.BAD_REQUEST
+
+# Unsure how to effectively test Flask HTML template
+def test_get_image_verification_portal_endpoint(client):
+    res = client.get(f"/image/verification-portal")
+    assert res.status_code == HTTPStatus.OK
+
+
+@pytest.mark.parametrize("data, expected", [
+    ({}, HTTPStatus.BAD_REQUEST),
+    ({ "_id": 0, }, HTTPStatus.BAD_REQUEST)
+])
+def test_get_image_update_status_endpoint_exception(data, expected, client):
+    res = client.post('image/update-status', data=data, content_type="multipart/form-data")
+    assert res.status_code == expected
+    print(res.data)

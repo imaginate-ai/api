@@ -14,3 +14,4 @@ mongomock
 python-dotenv
 marshmallow
 aws-lambda-powertools
+flask_cors

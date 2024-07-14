@@ -8,6 +8,7 @@ from bson.objectid import ObjectId
 # Other
 from dotenv import load_dotenv
 from flask import Flask, abort, json, jsonify, make_response, render_template, request
+from flask_cors import CORS
 
 # MongoDB related
 from pymongo import MongoClient
@@ -51,6 +52,7 @@ def build_result(_id: ObjectId, real: bool, date: int, theme: str, status: str):
 
 # Initialize clients
 app = Flask(__name__)
+CORS(app)
 load_dotenv()
 db = MongoClient(os.getenv("MONGO_TOKEN"))["imaginate"]
 fs = gridfs.GridFS(db)
