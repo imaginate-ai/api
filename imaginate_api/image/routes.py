@@ -1,5 +1,5 @@
 from flask import Blueprint, abort, jsonify, make_response, request
-from imaginate_api import fs
+from imaginate_api.extensions import fs
 from imaginate_api.schemas.image_info import ImageStatus
 from imaginate_api.utils import str_to_bool, validate_id, search_id, build_result
 from http import HTTPStatus
@@ -24,7 +24,7 @@ def upload():
     date = int(request.form["date"])
     theme = request.form["theme"]
     real = str_to_bool(request.form["real"])
-    status = ImageStatus.UNVERIFIED
+    status = ImageStatus.UNVERIFIED.value
   except (KeyError, TypeError, ValueError):
     abort(HTTPStatus.BAD_REQUEST, description="Invalid schema")
   if not (

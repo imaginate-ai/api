@@ -1,13 +1,20 @@
-from flask import json, render_template
+from flask import Flask, json, render_template
 from werkzeug.exceptions import HTTPException
 from imaginate_api.date.routes import bp as date_routes
 from imaginate_api.image.routes import bp as image_routes
-from imaginate_api import app
+from imaginate_api.config import Config
 
 
-# Register blueprints
-app.register_blueprint(date_routes, url_prefix="/date")
-app.register_blueprint(image_routes, url_prefix="/image")
+def create_app():
+  app = Flask(__name__)
+  app.config.from_object(Config)
+  app.register_blueprint(date_routes, url_prefix="/date")
+  app.register_blueprint(image_routes, url_prefix="/image")
+  return app
+
+
+# Create app
+app = create_app()
 
 
 # This endpoint is simply for testing purposes

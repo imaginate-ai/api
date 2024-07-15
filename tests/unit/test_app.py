@@ -7,7 +7,7 @@ import gridfs
 
 # Imaginate modules
 from imaginate_api.utils import str_to_bool, validate_id, search_id, build_result
-from imaginate_api import app
+from imaginate_api.app import create_app
 
 # Other
 from werkzeug.exceptions import BadRequest, NotFound, HTTPException
@@ -30,12 +30,11 @@ class Struct:
 
 @pytest.fixture()
 def client():
+    app = create_app()
+    app.config.update({
+        "TESTING": True
+    })
     return app.test_client()
-
-
-@pytest.fixture()
-def runner():
-    return app.test_cli_runner()
 
 
 @pytest.fixture
@@ -77,8 +76,9 @@ def mock_data():
 @pytest.fixture(autouse=True)
 def setup(mock_db, mock_fs):
     with (
-        patch("imaginate_api.db", mock_db),
-        patch("imaginate_api.fs", mock_fs)
+        patch("imaginate_api.date.routes.fs", mock_fs),
+        patch("imaginate_api.image.routes.fs", mock_fs),
+        patch("imaginate_api.utils.fs", mock_fs)
         ):
         yield
 
@@ -147,14 +147,14 @@ def test_post_image_create_endpoint_success(client, mock_data):
         assert res.json == build_result(res.json["url"].split("/")[-1], entry["real"], entry["date"], entry["theme"], entry["status"])
 
 @pytest.mark.parametrize("data, expected", [
-    ({}, HTTPStatus.NOT_FOUND),
+    ({}, HTTPStatus.BAD_REQUEST),
     ({
         "date": 0, 
         "theme": "sample", 
         "real": True, 
         "status": "unverified", 
         "file": FileStorage(stream=BytesIO(b"data"), filename="test.pdf", content_type="application/pdf")
-        }, HTTPStatus.NOT_FOUND)
+        }, HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
 ])
 def test_post_image_create_endpoint_exception(data, expected, client):
     res = client.post("/image/create", data=data, content_type="multipart/form-data")
@@ -200,7 +200,7 @@ def test_get_date_images_endpoint_exception(day, expected, client):
 
 # Tested differently since the endpoint involves sorting
 def test_get_date_latest_endpoint_success(mock_data, client):
-    with patch("imaginate_api.fs.find") as mock_find:
+    with patch("imaginate_api.date.routes.fs.find") as mock_find:
         sorted_data = sorted(mock_data, key=lambda x: x["date"], reverse=True)
         data = iter([Struct(**entry) for entry in sorted_data])
         mock_find.return_value.sort.return_value.limit.return_value = data
@@ -211,8 +211,8 @@ def test_get_date_latest_endpoint_success(mock_data, client):
 
 # Tested differently since the endpoint involves sorting
 def test_get_date_latest_endpoint_exception(client):
-    with patch("imaginate_api.fs.find") as mock_find:
+    with patch("imaginate_api.date.routes.fs.find") as mock_find:
         data = iter([])
         mock_find.return_value.sort.return_value.limit.return_value = data
         res = client.get("date/latest")
-        assert res.status_code == HTTPStatus.BAD_REQUEST
+        assert res.status_code == HTTPStatus.NOT_FOUND

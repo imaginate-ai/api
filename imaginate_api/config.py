@@ -20,3 +20,4 @@ class Config:
 
     MONGO_TOKEN = os.getenv("MONGO_TOKEN")
     DB_ENV = get_db_env()
+    TESTING = False

@@ -1,4 +1,3 @@
-from flask import Flask
 from pymongo import MongoClient
 import gridfs
 from imaginate_api.config import Config
@@ -17,7 +16,5 @@ def connect_mongodb(conn_uri: str, db_name: str):
 
 
 # Setup
-app = Flask(__name__)
-app.config.from_object(Config)
-print(f"Running in \"{app.config.get('DB_ENV')}\" environment")
-db, fs = connect_mongodb(app.config.get("MONGO_TOKEN"), f"imaginate_{app.config.get('DB_ENV')}")
+print(f"Running in \"{Config.DB_ENV}\" environment")
+db, fs = connect_mongodb(Config.MONGO_TOKEN, f"imaginate_{Config.DB_ENV}")

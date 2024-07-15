@@ -1,5 +1,5 @@
 from flask import Blueprint, abort, jsonify
-from imaginate_api import fs
+from imaginate_api.extensions import fs
 from imaginate_api.utils import build_result
 from http import HTTPStatus
 bp = Blueprint("date", __name__)
