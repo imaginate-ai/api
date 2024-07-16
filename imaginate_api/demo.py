@@ -1,4 +1,4 @@
-from ImageHandler import ImageHandler
+from image_handler import ImageHandler
 from schemas.image_info import ImageInfo
 
 image_handler = ImageHandler()
@@ -16,7 +16,7 @@ def example():
     filename="grilled_cheese.jpg", date=0, theme="grilled cheese", real=False
   )
   image_handler.enqueue_prompt_to_image(
-    prompt=text_prompt, info=info, num_inference_steps=100
+    prompt=text_prompt, info=info, num_inference_steps=1
   )
 
   # end image handler processing

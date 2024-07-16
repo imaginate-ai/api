@@ -4,8 +4,8 @@ from unittest.mock import patch, MagicMock
 from PIL import Image
 import requests
 
-from imaginate_api.image_handler import ImageHandler, DataType
-from imaginate_api.schemas.image_info import ImageInfo
+from image_handler import ImageHandler, DataType
+from schemas.image_info import ImageInfo
 import io
 
 
@@ -87,7 +87,6 @@ def mock_diffusion_pipeline(mocker):
   )
 
 
-# get_image_from_url
 def test_get_image_from_url_success(image_handler, mock_image):
   with (
     patch("requests.get") as mock_get,

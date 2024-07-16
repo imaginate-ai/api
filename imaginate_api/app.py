@@ -181,7 +181,13 @@ def delete_image(id):
   res_status = getattr(res, "status", None)
 
   info = build_result(res._id, res_real, res_date, res_theme, res_status)
-  fs.delete(res._id)
+  try:
+    fs.delete(res._id)
+  except HTTPException as e:
+    abort(e.code, description=e.description)
+  except Exception as e:
+    abort(500, description=str(e))
+
   return info
 
 
