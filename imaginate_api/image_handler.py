@@ -11,16 +11,11 @@ import torch
 from aws_lambda_powertools import Logger
 from schemas.image_info import ImageInfo
 
-# Suppress saftey warnings and pipeline downloads
-with (
-  contextlib.redirect_stdout(io.StringIO()),
-  contextlib.redirect_stderr(io.StringIO()),
-):
-  from diffusers import (
-    EulerAncestralDiscreteScheduler,
-    StableDiffusionInstructPix2PixPipeline,
-    DiffusionPipeline,
-  )
+from diffusers import (
+  EulerAncestralDiscreteScheduler,
+  StableDiffusionInstructPix2PixPipeline,
+  DiffusionPipeline,
+)
 
 logger = Logger()
 
@@ -151,15 +146,11 @@ class ImageHandler:
 
   # Process the task
   def process(self, item):
-    with (
-      contextlib.redirect_stdout(io.StringIO()),
-      contextlib.redirect_stderr(io.StringIO()),
-    ):
-      image = None
-      if item["type"] == DataType.IMAGE:
-        image = self.image_pipe(**item["kwargs"]).images[0]
-      elif item["type"] == DataType.PROMPT:
-        image = self.text_pipe(**item["kwargs"]).images[0]
+    image = None
+    if item["type"] == DataType.IMAGE:
+      image = self.image_pipe(**item["kwargs"]).images[0]
+    elif item["type"] == DataType.PROMPT:
+      image = self.text_pipe(**item["kwargs"]).images[0]
 
     save_image(image, item["info"])
     remaining_tasks = self.queue.qsize() - 1
