@@ -1,8 +1,10 @@
 from flask import Blueprint, abort, jsonify
-from imaginate_api.extensions import fs
-from imaginate_api.utils import build_result
+from extensions import fs
+from utils import build_result
 from http import HTTPStatus
+
 bp = Blueprint("date", __name__)
+
 
 # GET /date/<day>/images: used for viewing images of a specified date
 @bp.route("/<day>/images")
