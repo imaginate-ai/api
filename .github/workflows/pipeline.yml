@@ -1,0 +1,83 @@
+name: PR Pipeline
+on: [pull_request]
+jobs:
+  build:
+    name: Build
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+      - name: Restore cached .venv
+        uses: actions/cache/restore@v4
+        id: cache-venv
+        with:
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+          path: .venv
+      - name: Setup environment
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          poetry config --list
+      - name: Install dependencies
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+      - name: Cache .venv
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+          path: .venv
+  test:
+    name: Test
+    needs: [build]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - name: Restore cached .venv
+        uses: actions/cache/restore@v4
+        with:
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+          path: .venv
+      - name: Test setup
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          pip install pytest
+      - name: Create .env
+        uses: SpicyPizza/create-envfile@v2.0
+        with:
+          envkey_DEV: "dev"
+          envkey_MONGO_TOKEN: ${{ secrets.MONGO_TOKEN }}
+          file_name: .env
+      - name: Run tests
+        run: poetry run pytest --doctest-modules --junitxml=junit/test-results.xml
+  lint:
+    name: Lint
+    needs: [build]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - name: Restore cached .venv
+        uses: actions/cache/restore@v4
+        with:
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+          path: .venv
+      - name: Lint setup
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff
+      - name: Run linter
+        run: ruff check --output-format=github .
