@@ -8,6 +8,9 @@ from werkzeug.datastructures import FileStorage
 from io import BytesIO
 from urllib.parse import urlparse
 
+START_DATE = 1722484800  # timestamp for august 1st, 2024
+SECONDS_PER_DAY = 86400
+
 
 # Helper function to get boolean
 def str_to_bool(string: str):
@@ -98,3 +101,8 @@ def build_image_from_url(url):
     filename=str(url).rstrip("/").split("/")[-1],
     content_type=type_photo,
   )
+# helper function that returns a timestamp date object
+def calculate_date(day: int):
+  if day > START_DATE:
+    return day
+  return START_DATE + day * SECONDS_PER_DAY

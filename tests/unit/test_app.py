@@ -6,7 +6,13 @@ import pytest
 import gridfs
 
 # Imaginate modules
-from imaginate_api.utils import str_to_bool, validate_id, search_id, build_result
+from imaginate_api.utils import (
+  str_to_bool,
+  validate_id,
+  search_id,
+  build_result,
+  calculate_date,
+)
 from imaginate_api.app import create_app
 
 # Other
@@ -62,7 +68,7 @@ def mock_data():
       "data": b"data",
       "filename": f"sample-{i}",
       "type": "image/png",
-      "date": i,
+      "date": calculate_date(i),
       "theme": "sample",
       "real": True,
       "status": ImageStatus.UNVERIFIED.value,
