@@ -3,6 +3,8 @@ from bson.errors import InvalidId
 from bson.objectid import ObjectId
 from http import HTTPStatus
 from imaginate_api.extensions import fs
+from imaginate_api.schemas.date_info import DateInfo
+
 
 
 # Helper function to get boolean
@@ -39,3 +41,10 @@ def build_result(_id: ObjectId, real: bool, date: int, theme: str, status: str):
     "theme": theme,
     "status": status,
   }
+
+
+# helper function that returns a timestamp date object
+def calculate_date(day: int):
+  if day > DateInfo.START_DATE.value:
+    return day
+  return DateInfo.START_DATE.value + day * DateInfo.SECONDS_PER_DAY.value

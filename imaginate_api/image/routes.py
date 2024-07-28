@@ -1,9 +1,17 @@
 from flask import Blueprint, abort, jsonify, make_response, request
 from imaginate_api.extensions import fs
 from imaginate_api.schemas.image_info import ImageStatus
-from imaginate_api.utils import str_to_bool, validate_id, search_id, build_result
+from imaginate_api.utils import (
+  str_to_bool,
+  validate_id,
+  search_id,
+  build_result,
+  calculate_date,
+)
 from http import HTTPStatus
+
 bp = Blueprint("image", __name__)
+
 
 # GET /read: used for viewing all images
 # This endpoint is simply for testing purposes
@@ -21,7 +29,7 @@ def read_all():
 def upload():
   try:
     file = request.files["file"]
-    date = int(request.form["date"])
+    date = calculate_date(int(request.form["date"]))
     theme = request.form["theme"]
     real = str_to_bool(request.form["real"])
     status = ImageStatus.UNVERIFIED.value
