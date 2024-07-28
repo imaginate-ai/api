@@ -7,9 +7,8 @@ import requests
 from werkzeug.datastructures import FileStorage
 from io import BytesIO
 from urllib.parse import urlparse
+from imaginate_api.schemas.date_info import DateInfo
 
-START_DATE = 1722484800  # timestamp for august 1st, 2024
-SECONDS_PER_DAY = 86400
 
 
 # Helper function to get boolean
@@ -103,6 +102,6 @@ def build_image_from_url(url):
   )
 # helper function that returns a timestamp date object
 def calculate_date(day: int):
-  if day > START_DATE:
+  if day > DateInfo.START_DATE.value:
     return day
-  return START_DATE + day * SECONDS_PER_DAY
+  return DateInfo.START_DATE.value + day * DateInfo.SECONDS_PER_DAY.value

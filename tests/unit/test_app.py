@@ -136,6 +136,19 @@ def test_build_result():
   pass
 
 
+@pytest.mark.parametrize(
+  "data, expected",
+  [
+    (0, 1722484800),
+    (3, 1722744000),
+    (1722684800, 1722684800)
+  ],
+)
+def test_calculate_date(data, expected):
+  assert  calculate_date(data) == expected
+
+
+
 # Not testing as this endpoint will likely be removed in future
 def test_get_root_endpoint():
   pass
@@ -157,7 +170,7 @@ def test_post_image_create_endpoint_success(client, mock_data):
     assert res.json == build_result(
       res.json["url"].split("/")[-1],
       entry["real"],
-      entry["date"],
+      calculate_date(entry["date"]),
       entry["theme"],
       entry["status"],
       entry["filename"],
@@ -237,6 +250,7 @@ def test_get_image_read_properties_endpoint(mock_fs, mock_data, client):
 
 def test_get_date_images_endpoint_success(mock_fs, mock_data, client):
   for entry in mock_data:
+    entry['date'] = calculate_date(entry['date'])
     _id = mock_fs.put(**entry)
     res = client.get(f"/date/{entry['date']}/images")
     assert res.status_code == HTTPStatus.OK
