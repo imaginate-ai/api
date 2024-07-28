@@ -1,5 +1,5 @@
-from ImageHandler import ImageHandler
-from schemas.image_info import ImageInfo
+from imaginate_api.image_handler import ImageHandler
+from imaginate_api.schemas.image_info import ImageInfo
 
 image_handler = ImageHandler()
 

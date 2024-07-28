@@ -28,7 +28,7 @@ class DataType(Enum):
 class ImageHandler:
   def __init__(self):
     # provide support for both cuda and cpu
-    self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    self.device = torch.device("cuda")
     logger.info(f"Initialized for {self.device}")
 
     # Suppress warnings and model outputs

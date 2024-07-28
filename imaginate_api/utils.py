@@ -4,6 +4,9 @@ from bson.objectid import ObjectId
 from http import HTTPStatus
 from imaginate_api.extensions import fs
 
+START_DATE = 1722484800  # timestamp for august 1st, 2024
+SECONDS_PER_DAY = 86400
+
 
 # Helper function to get boolean
 def str_to_bool(string: str):
@@ -31,7 +34,7 @@ def search_id(_id: ObjectId):
 
 
 # Helper function to build schema-matching JSON response
-def build_result(_id: ObjectId, real: bool, date: int, theme: str, status: str):
+def build_result(_id: ObjectId, real: bool, date: str, theme: str, status: str):
   return {
     "url": "/read/" + str(_id),
     "real": real,
@@ -39,3 +42,10 @@ def build_result(_id: ObjectId, real: bool, date: int, theme: str, status: str):
     "theme": theme,
     "status": status,
   }
+
+
+# helper function that returns a timestamp date object
+def calculate_date(day: int):
+  if day > START_DATE:
+    return day
+  return START_DATE + day * SECONDS_PER_DAY
