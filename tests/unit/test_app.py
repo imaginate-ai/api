@@ -15,9 +15,10 @@ from werkzeug.datastructures import FileStorage
 from bson.objectid import ObjectId
 from io import BytesIO
 from http import HTTPStatus
+from imaginate_api.schemas.image_info import ImageStatus
 
 # Mocking
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 import mongomock  # NOTE: mongomock doesn't work well with sorting
 
 
@@ -59,12 +60,12 @@ def mock_data():
   mock_data = [
     {
       "data": b"data",
-      "filename": "sample",
+      "filename": f"sample-{i}",
       "type": "image/png",
       "date": i,
       "theme": "sample",
       "real": True,
-      "status": "unverified",
+      "status": ImageStatus.UNVERIFIED.value,
     }
     for i in range(5)
   ]
@@ -73,7 +74,7 @@ def mock_data():
 
 # Set up database before running tests
 @pytest.fixture(autouse=True)
-def setup(mock_db, mock_fs):
+def setup(mock_fs):
   with (
     patch("imaginate_api.date.routes.fs", mock_fs),
     patch("imaginate_api.image.routes.fs", mock_fs),
@@ -153,30 +154,52 @@ def test_post_image_create_endpoint_success(client, mock_data):
       entry["date"],
       entry["theme"],
       entry["status"],
+      entry["filename"],
     )
 
 
 @pytest.mark.parametrize(
   "data, expected",
   [
-    ({}, HTTPStatus.BAD_REQUEST),
+    (
+      {"file": FileStorage(stream=BytesIO(b"data"), content_type="image/png")},
+      HTTPStatus.BAD_REQUEST,
+    ),
     (
       {
         "date": 0,
         "theme": "sample",
         "real": True,
-        "status": "unverified",
+        "status": ImageStatus.UNVERIFIED.value,
         "file": FileStorage(
           stream=BytesIO(b"data"), filename="test.pdf", content_type="application/pdf"
         ),
       },
       HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
     ),
+    (
+      {
+        "date": 0,
+        "theme": "sample",
+        "real": True,
+        "status": ImageStatus.UNVERIFIED.value,
+        "url": "https://www.google.com",  # Causes endpoint to take a different flow
+        "file": FileStorage(
+          stream=BytesIO(b"data"), filename="test.png", content_type="image/png"
+        ),
+      },
+      HTTPStatus.OK,
+    ),
   ],
 )
-def test_post_image_create_endpoint_exception(data, expected, client):
-  res = client.post("/image/create", data=data, content_type="multipart/form-data")
-  assert res.status_code == expected
+def test_post_image_create_endpoint_status_code(data, expected, client):
+  with patch("requests.get") as mock_get:
+    mock_response = MagicMock()
+    mock_response.content = data["file"].stream.read()
+    mock_response.headers.get = MagicMock(return_value=data["file"].content_type)
+    mock_get.return_value = mock_response
+    res = client.post("/image/create", data=data, content_type="multipart/form-data")
+    assert res.status_code == expected
 
 
 # Not testing scenarios with exceptions as they have been tested by helper functions:
@@ -197,7 +220,12 @@ def test_get_image_read_properties_endpoint(mock_fs, mock_data, client):
     res = client.get(f"/image/read/{_id}/properties")
     assert res.status_code == HTTPStatus.OK
     assert res.json == build_result(
-      _id, entry["real"], entry["date"], entry["theme"], entry["status"]
+      _id,
+      entry["real"],
+      entry["date"],
+      entry["theme"],
+      entry["status"],
+      entry["filename"],
     )
 
 
@@ -207,7 +235,14 @@ def test_get_date_images_endpoint_success(mock_fs, mock_data, client):
     res = client.get(f"/date/{entry['date']}/images")
     assert res.status_code == HTTPStatus.OK
     assert res.json == [
-      build_result(_id, entry["real"], entry["date"], entry["theme"], entry["status"])
+      build_result(
+        _id,
+        entry["real"],
+        entry["date"],
+        entry["theme"],
+        entry["status"],
+        entry["filename"],
+      )
     ]
 
 
@@ -245,7 +280,12 @@ def test_delete_image_endpoint(mock_fs, mock_data, client):
     res = client.delete(f"/image/{_id}")
     assert res.status_code == HTTPStatus.OK
     assert res.json == build_result(
-      _id, entry["real"], entry["date"], entry["theme"], entry["status"]
+      _id,
+      entry["real"],
+      entry["date"],
+      entry["theme"],
+      entry["status"],
+      entry["filename"],
     )
 
 
