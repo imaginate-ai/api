@@ -1,9 +1,16 @@
-from flask import Blueprint, abort, jsonify, make_response, request
+from flask import Blueprint, jsonify, make_response, request
 from imaginate_api.extensions import fs
 from imaginate_api.schemas.image_info import ImageStatus
-from imaginate_api.utils import str_to_bool, validate_id, search_id, build_result
-from http import HTTPStatus
+from imaginate_api.utils import (
+  validate_id,
+  search_id,
+  build_result,
+  validate_post_image_create_request,
+  build_image_from_url,
+)
+
 bp = Blueprint("image", __name__)
+
 
 # GET /read: used for viewing all images
 # This endpoint is simply for testing purposes
@@ -19,19 +26,22 @@ def read_all():
 # TODO: Add a lot of validation to fit our needs
 @bp.route("/create", methods=["POST"])
 def upload():
-  try:
-    file = request.files["file"]
-    date = int(request.form["date"])
-    theme = request.form["theme"]
-    real = str_to_bool(request.form["real"])
-    status = ImageStatus.UNVERIFIED.value
-  except (KeyError, TypeError, ValueError):
-    abort(HTTPStatus.BAD_REQUEST, description="Invalid schema")
-  if not (
-    file.filename and file.content_type and file.content_type.startswith("image/")
-  ):
-    abort(HTTPStatus.UNSUPPORTED_MEDIA_TYPE, description="Invalid file")
-
+  request_url = request.form.get(
+    "url", None
+  )  # Determine if our request wants us to use a url
+  if request_url:
+    print("Getting file data through url attribute")
+    request_file = build_image_from_url(request_url)
+  else:
+    print("Getting file data through file attribute")
+    request_file = request.files.get("file")
+  file, date, theme, real = validate_post_image_create_request(
+    request_file,
+    request.form.get("date"),
+    request.form.get("theme"),
+    request.form.get("real"),
+  )
+  status = ImageStatus.UNVERIFIED.value
   _id = fs.put(
     file.stream.read(),
     filename=file.filename,
@@ -41,7 +51,7 @@ def upload():
     real=real,
     status=status,
   )
-  return jsonify(build_result(_id, real, date, theme, status))
+  return jsonify(build_result(_id, real, date, theme, status, file.filename))
 
 
 # GET /read/<id>: used for viewing a specific image
@@ -61,7 +71,9 @@ def read(id):
 def read_properties(id):
   _id = validate_id(id)
   res = search_id(_id)
-  return jsonify(build_result(res._id, res.real, res.date, res.theme, res.status))
+  return jsonify(
+    build_result(res._id, res.real, res.date, res.theme, res.status, res.filename)
+  )
 
 
 # DELETE /delete/<id>: used for deleting a single image
@@ -74,7 +86,8 @@ def delete_image(id):
   res_date = getattr(res, "date", None)
   res_theme = getattr(res, "theme", None)
   res_status = getattr(res, "status", None)
+  res_filename = getattr(res, "filename", None)
 
-  info = build_result(res._id, res_real, res_date, res_theme, res_status)
+  info = build_result(res._id, res_real, res_date, res_theme, res_status, res_filename)
   fs.delete(res._id)
-  return info
+  return jsonify(info)
