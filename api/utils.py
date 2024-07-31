@@ -2,7 +2,7 @@ from flask import abort
 from bson.errors import InvalidId
 from bson.objectid import ObjectId
 from http import HTTPStatus
-from imaginate_api.extensions import fs
+from api.extensions import fs
 
 
 # Helper function to get boolean

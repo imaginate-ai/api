@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 import gridfs
-from imaginate_api.config import Config
+from api.config import Config
 import sys
 
 

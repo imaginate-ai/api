@@ -1,8 +1,8 @@
 from flask import Flask, json, render_template
 from werkzeug.exceptions import HTTPException
-from imaginate_api.date.routes import bp as date_routes
-from imaginate_api.image.routes import bp as image_routes
-from imaginate_api.config import Config
+from api.date.routes import bp as date_routes
+from api.image.routes import bp as image_routes
+from api.config import Config
 
 
 def create_app():

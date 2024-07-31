@@ -6,8 +6,8 @@ import pytest
 import gridfs
 
 # Imaginate modules
-from imaginate_api.utils import str_to_bool, validate_id, search_id, build_result
-from imaginate_api.app import create_app
+from api.utils import str_to_bool, validate_id, search_id, build_result
+from api.app import create_app
 
 # Other
 from werkzeug.exceptions import BadRequest, NotFound, HTTPException
@@ -75,9 +75,9 @@ def mock_data():
 @pytest.fixture(autouse=True)
 def setup(mock_db, mock_fs):
   with (
-    patch("imaginate_api.date.routes.fs", mock_fs),
-    patch("imaginate_api.image.routes.fs", mock_fs),
-    patch("imaginate_api.utils.fs", mock_fs),
+    patch("api.date.routes.fs", mock_fs),
+    patch("api.image.routes.fs", mock_fs),
+    patch("api.utils.fs", mock_fs),
   ):
     yield
 
@@ -221,7 +221,7 @@ def test_get_date_images_endpoint_exception(day, expected, client):
 
 # Tested differently since the endpoint involves sorting
 def test_get_date_latest_endpoint_success(mock_data, client):
-  with patch("imaginate_api.date.routes.fs.find") as mock_find:
+  with patch("api.date.routes.fs.find") as mock_find:
     sorted_data = sorted(mock_data, key=lambda x: x["date"], reverse=True)
     data = iter([Struct(**entry) for entry in sorted_data])
     mock_find.return_value.sort.return_value.limit.return_value = data
@@ -232,7 +232,7 @@ def test_get_date_latest_endpoint_success(mock_data, client):
 
 # Tested differently since the endpoint involves sorting
 def test_get_date_latest_endpoint_exception(client):
-  with patch("imaginate_api.date.routes.fs.find") as mock_find:
+  with patch("api.date.routes.fs.find") as mock_find:
     data = iter([])
     mock_find.return_value.sort.return_value.limit.return_value = data
     res = client.get("date/latest")

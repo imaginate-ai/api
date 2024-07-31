@@ -1,7 +1,7 @@
 from flask import Blueprint, abort, jsonify, make_response, request
-from imaginate_api.extensions import fs
-from imaginate_api.schemas.image_info import ImageStatus
-from imaginate_api.utils import str_to_bool, validate_id, search_id, build_result
+from api.extensions import fs
+from image_handler_client.schemas.image_info import ImageStatus
+from api.utils import str_to_bool, validate_id, search_id, build_result
 from http import HTTPStatus
 bp = Blueprint("image", __name__)
 
