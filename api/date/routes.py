@@ -1,6 +1,6 @@
 from flask import Blueprint, abort, jsonify
-from extensions import fs
-from utils import build_result
+from api.extensions import fs
+from api.utils import build_result
 from http import HTTPStatus
 
 bp = Blueprint("date", __name__)
@@ -24,6 +24,7 @@ def images_by_date(day):
         document.date,
         document.theme,
         document.status,
+        document.filename,
       )
     )
   return jsonify(out)
