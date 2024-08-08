@@ -16,7 +16,7 @@ jobs:
         uses: actions/cache/restore@v4
         id: cache-venv
         with:
-          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+          key: venv-${{ runner.os }}-${{ hashFiles('poetry.lock') }}
           path: .venv
       - name: Setup environment
         run: |
@@ -30,7 +30,7 @@ jobs:
         if: steps.cache-venv.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
-          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+          key: venv-${{ runner.os }}-${{ hashFiles('poetry.lock') }}
           path: .venv
   test:
     name: Test
@@ -45,7 +45,7 @@ jobs:
       - name: Restore cached .venv
         uses: actions/cache/restore@v4
         with:
-          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+          key: venv-${{ runner.os }}-${{ hashFiles('poetry.lock') }}
           path: .venv
       - name: Test setup
         run: |
@@ -73,7 +73,7 @@ jobs:
       - name: Restore cached .venv
         uses: actions/cache/restore@v4
         with:
-          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+          key: venv-${{ runner.os }}-${{ hashFiles('poetry.lock') }}
           path: .venv
       - name: Lint setup
         run: |
