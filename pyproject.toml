@@ -10,14 +10,18 @@ repository = "https://github.com/imaginateai/api"
 
 [tool.poetry.dependencies]
 python = "^3.12"
+requests = "^2.0"
 Flask = "^2.0"
 pymongo = "^4.0"
 python-dotenv = "^0.21"
+setuptools = "^70.2.0"
 pre-commit = "^3.7.1"
 pytest = "^8.2.2"
 mongomock = "^4.1.2"
-setuptools = "^72.1.0"
 image-handler-client = {git = "https://github.com/imaginate-ai/image-handler-client.git", rev = "v1.0.0"}
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.7.1"
 
 [tool.ruff]
 exclude = []
