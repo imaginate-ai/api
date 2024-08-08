@@ -1,6 +1,6 @@
 import requests
 import mimetypes
-from imaginate_api.schemas.image_info import ImageStatus
+from image_handler_client.schemas.image_info import ImageStatus
 import os
 from dotenv import load_dotenv
 
