@@ -62,7 +62,7 @@ jobs:
         run: poetry run pytest --doctest-modules --junitxml=junit/test-results.xml
   lint:
     name: Lint
-    needs: [build]
+    needs: [test]
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
