@@ -15,7 +15,7 @@ from werkzeug.datastructures import FileStorage
 from bson.objectid import ObjectId
 from io import BytesIO
 from http import HTTPStatus
-from imaginate_api.schemas.image_info import ImageStatus
+from image_handler_client.schemas.image_info import ImageStatus
 
 # Mocking
 from unittest.mock import patch, MagicMock

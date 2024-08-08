@@ -6,30 +6,19 @@ authors = [
   "Nathan <probysuper8@gmail.com>",
   "Faisal <faisalfawad2004@gmail.com>"]
 readme = "README.md"
-repository = "https://github.com/zachale/imaginate-api"
+repository = "https://github.com/imaginate-ai/imaginate-api"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-requests = "^2.0"
-transformers = "^4.0"
 Flask = "^2.0"
 pymongo = "^4.0"
 python-dotenv = "^0.21"
-marshmallow = "^3.0"
-aws-lambda-powertools = "^1.0"
-torch = { url = "https://download.pytorch.org/whl/cu121/torch-2.3.1%2Bcu121-cp312-cp312-win_amd64.whl" }
-torchaudio = { url = "https://download.pytorch.org/whl/cu121/torchaudio-2.3.1%2Bcu121-cp312-cp312-win_amd64.whl" }
-torchvision = { url = "https://download.pytorch.org/whl/cu121/torchvision-0.18.1%2Bcu121-cp312-cp312-win_amd64.whl" }
-diffusers = "0.29.2"
-setuptools = "^70.2.0"
-accelerate = "^0.32.0"
 pre-commit = "^3.7.1"
-pylint = "^3.2.5"
 pytest = "^8.2.2"
 mongomock = "^4.1.2"
-
-[tool.poetry.group.dev.dependencies]
-pre-commit = "^3.7.1"
+setuptools = "^72.1.0"
+image-handler-client = {git = "https://github.com/imaginate-ai/image-handler-client.git", rev = "v1.0.0"}
+requests = "^2.32.3"
 
 [tool.ruff]
 exclude = []

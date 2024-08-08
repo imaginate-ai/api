@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, make_response, request
 from imaginate_api.extensions import fs
-from imaginate_api.schemas.image_info import ImageStatus
+from image_handler_client.schemas.image_info import ImageStatus
 from imaginate_api.utils import (
   validate_id,
   search_id,
