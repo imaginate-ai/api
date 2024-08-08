@@ -2,7 +2,7 @@
 local-setup:
 	@echo Creating virtual environment
 	@poetry shell
-	@pre-commit install
+	@poetry install --sync
 
 .PHONY: install
 install:
