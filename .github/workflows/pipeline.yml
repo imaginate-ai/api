@@ -12,8 +12,6 @@ jobs:
           cache: "pip"
       - name: Display Python version
         run: python -c "import sys; print(sys.version)"
-      - name: Log poetry.lock file
-        run: cat poetry.lock
       - name: Restore cached .venv
         uses: actions/cache/restore@v4
         id: cache-venv
@@ -28,8 +26,6 @@ jobs:
       - name: Install dependencies
         if: steps.cache-venv.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
-      - name: Log poetry.lock file
-        run: cat poetry.lock
       - name: Cache .venv
         if: steps.cache-venv.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
