@@ -12,6 +12,10 @@ jobs:
           cache: "pip"
       - name: Display Python version
         run: python -c "import sys; print(sys.version)"
+      - name: Display poetry.lock hash before restore
+        run: |
+          echo "Hash before restore:"
+          cat poetry.lock | shasum -a 256
       - name: Restore cached .venv
         uses: actions/cache/restore@v4
         id: cache-venv
@@ -26,12 +30,17 @@ jobs:
       - name: Install dependencies
         if: steps.cache-venv.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
+      - name: Display poetry.lock hash after install
+        run: |
+          echo "Hash after install:"
+          cat poetry.lock | shasum -a 256
       - name: Cache .venv
         if: steps.cache-venv.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
           path: .venv
+
   test:
     name: Test
     needs: [build]
@@ -60,6 +69,7 @@ jobs:
           file_name: .env
       - name: Run tests
         run: poetry run pytest --doctest-modules --junitxml=junit/test-results.xml
+
   lint:
     name: Lint
     needs: [test]
