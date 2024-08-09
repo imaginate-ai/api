@@ -5,8 +5,9 @@ from imaginate_api.utils import (
   validate_id,
   search_id,
   build_result,
-  validate_post_image_create_request,
+  calculate_date,
   build_image_from_url,
+  validate_post_image_create_request,
 )
 
 bp = Blueprint("image", __name__)
@@ -46,7 +47,7 @@ def upload():
     file.stream.read(),
     filename=file.filename,
     type=file.content_type,
-    date=date,
+    date=calculate_date(date),
     theme=theme,
     real=real,
     status=status,

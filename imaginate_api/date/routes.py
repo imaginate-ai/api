@@ -1,6 +1,6 @@
 from flask import Blueprint, abort, jsonify
 from imaginate_api.extensions import fs
-from imaginate_api.utils import build_result
+from imaginate_api.utils import build_result, calculate_date
 from http import HTTPStatus
 
 bp = Blueprint("date", __name__)
@@ -14,7 +14,9 @@ def images_by_date(day):
   except ValueError:
     abort(HTTPStatus.BAD_REQUEST, description="Invalid date")
 
-  res = fs.find({"date": day})
+  date = calculate_date(day)
+
+  res = fs.find({"date": date})
   out = []
   for document in res:
     out.append(
