@@ -68,7 +68,7 @@ def mock_data():
       "data": b"data",
       "filename": f"sample-{i}",
       "type": "image/png",
-      "date": calculate_date(i),
+      "date": calculate_date(str(i)),
       "theme": "sample",
       "real": True,
       "status": ImageStatus.UNVERIFIED.value,
@@ -138,15 +138,10 @@ def test_build_result():
 
 @pytest.mark.parametrize(
   "data, expected",
-  [
-    (0, 1722484800),
-    (3, 1722744000),
-    (1722684800, 1722684800)
-  ],
+  [(0, 1722484800), ("3", 1722744000), (1722684800, 1722684800)],
 )
 def test_calculate_date(data, expected):
-  assert  calculate_date(data) == expected
-
+  assert calculate_date(data) == expected
 
 
 # Not testing as this endpoint will likely be removed in future
@@ -250,7 +245,7 @@ def test_get_image_read_properties_endpoint(mock_fs, mock_data, client):
 
 def test_get_date_images_endpoint_success(mock_fs, mock_data, client):
   for entry in mock_data:
-    entry['date'] = calculate_date(entry['date'])
+    entry["date"] = calculate_date(entry["date"])
     _id = mock_fs.put(**entry)
     res = client.get(f"/date/{entry['date']}/images")
     assert res.status_code == HTTPStatus.OK

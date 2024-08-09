@@ -1,15 +1,14 @@
 from flask import Blueprint, jsonify, make_response, request
 from imaginate_api.extensions import fs
-from imaginate_api.schemas.image_info import ImageStatus
+from image_handler_client.schemas.image_info import ImageStatus
 from imaginate_api.utils import (
-  str_to_bool,
   validate_id,
   search_id,
   build_result,
   calculate_date,
   build_image_from_url,
+  validate_post_image_create_request,
 )
-from http import HTTPStatus
 
 bp = Blueprint("image", __name__)
 
@@ -39,7 +38,7 @@ def upload():
     request_file = request.files.get("file")
   file, date, theme, real = validate_post_image_create_request(
     request_file,
-     calculate_date(int(request.form.get("date"))),
+    request.form.get("date"),
     request.form.get("theme"),
     request.form.get("real"),
   )
@@ -48,7 +47,7 @@ def upload():
     file.stream.read(),
     filename=file.filename,
     type=file.content_type,
-    date=date,
+    date=calculate_date(date),
     theme=theme,
     real=real,
     status=status,

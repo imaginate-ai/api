@@ -10,7 +10,6 @@ from urllib.parse import urlparse
 from imaginate_api.schemas.date_info import DateInfo
 
 
-
 # Helper function to get boolean
 def str_to_bool(string: str):
   return string.lower() == "true"
@@ -100,8 +99,15 @@ def build_image_from_url(url):
     filename=str(url).rstrip("/").split("/")[-1],
     content_type=type_photo,
   )
-# helper function that returns a timestamp date object
-def calculate_date(day: int):
-  if day > DateInfo.START_DATE.value:
-    return day
-  return DateInfo.START_DATE.value + day * DateInfo.SECONDS_PER_DAY.value
+
+
+# helper function that returns a timestamp as an integer, no matter if day is inputed as a timestamp or day #
+# WARNING, do not enter a timestamp from BEFORE august 1st 2024.
+def calculate_date(day: str | int):
+  if day is not None:
+    if isinstance(day, str):
+      day = int(day)
+    if day >= DateInfo.START_DATE.value:
+      return day
+    return DateInfo.START_DATE.value + day * DateInfo.SECONDS_PER_DAY.value
+  return None
