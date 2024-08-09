@@ -22,6 +22,7 @@ from bson.objectid import ObjectId
 from io import BytesIO
 from http import HTTPStatus
 from image_handler_client.schemas.image_info import ImageStatus
+import base64
 
 # Mocking
 from unittest.mock import patch, MagicMock
@@ -249,16 +250,17 @@ def test_get_date_images_endpoint_success(mock_fs, mock_data, client):
     _id = mock_fs.put(**entry)
     res = client.get(f"/date/{entry['date']}/images")
     assert res.status_code == HTTPStatus.OK
-    assert res.json == [
-      build_result(
-        _id,
-        entry["real"],
-        entry["date"],
-        entry["theme"],
-        entry["status"],
-        entry["filename"],
-      )
-    ]
+    return_image = build_result(
+      _id,
+      entry["real"],
+      entry["date"],
+      entry["theme"],
+      entry["status"],
+      entry["filename"],
+    )
+    encoded_data = base64.b64encode(entry["data"])
+    return_image["data"] = encoded_data.decode("utf-8")
+    assert res.json == [return_image]
 
 
 @pytest.mark.parametrize(
