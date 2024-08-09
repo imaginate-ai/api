@@ -68,7 +68,7 @@ def mock_data():
       "data": b"data",
       "filename": f"sample-{i}",
       "type": "image/png",
-      "date": calculate_date(str(i)),
+      "date": calculate_date(i),
       "theme": "sample",
       "real": True,
       "status": ImageStatus.UNVERIFIED.value,
