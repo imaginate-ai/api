@@ -19,5 +19,6 @@ def get_db_env():
 class Config:
   load_dotenv()
   MONGO_TOKEN = os.getenv("MONGO_TOKEN")
+  PEXELS_TOKEN = os.getenv("PEXELS_TOKEN")
   DB_ENV = get_db_env()
   TESTING = False

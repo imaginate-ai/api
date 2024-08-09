@@ -1,8 +1,12 @@
-from flask import abort
+from flask import abort, current_app
 from bson.errors import InvalidId
 from bson.objectid import ObjectId
 from http import HTTPStatus
 from imaginate_api.extensions import fs
+import requests
+from werkzeug.datastructures import FileStorage
+from io import BytesIO
+from urllib.parse import urlparse
 
 
 # Helper function to get boolean
@@ -23,7 +27,6 @@ def validate_id(image_id: str | ObjectId | bytes):
 
 # Helper function to search MongoDB ID
 def search_id(_id: ObjectId):
-  print(fs)
   res = next(fs.find({"_id": _id}), None)
   if not res:
     abort(HTTPStatus.NOT_FOUND, "Collection not found")
@@ -31,11 +34,67 @@ def search_id(_id: ObjectId):
 
 
 # Helper function to build schema-matching JSON response
-def build_result(_id: ObjectId, real: bool, date: int, theme: str, status: str):
+def build_result(
+  _id: ObjectId, real: bool, date: int, theme: str, status: str, filename: str
+):
   return {
-    "url": "/read/" + str(_id),
+    "filename": filename,
+    "url": "image/read/" + str(_id),
     "real": real,
     "date": date,
     "theme": theme,
     "status": status,
   }
+
+
+# Helper function to validate POST image/create endpoint
+def validate_post_image_create_request(file, date, theme, real):
+  if any(x is None for x in [file, date, theme, real]):
+    abort(HTTPStatus.BAD_REQUEST, description="Invalid schema")
+  try:
+    date = int(date)
+    real = str_to_bool(real)
+  except (KeyError, TypeError, ValueError):
+    abort(HTTPStatus.BAD_REQUEST, description="Invalid schema")
+  if not (
+    file.filename and file.content_type and file.content_type.startswith("image/")
+  ):
+    abort(HTTPStatus.UNSUPPORTED_MEDIA_TYPE, description="Invalid file")
+  return file, date, theme, real
+
+
+# This catches most urls but not all!
+def validate_url(url):
+  try:
+    result = urlparse(url)
+    return all([result.scheme, result.netloc])
+  except AttributeError:
+    return False
+
+
+def build_image_from_url(url):
+  if not validate_url(url):
+    abort(HTTPStatus.BAD_REQUEST, description=f"Malformed URL: {url}")
+
+  # Get raw content of the source image
+  photo_response = requests.get(
+    url, headers={"Authorization": current_app.config["PEXELS_TOKEN"]}, stream=True
+  )
+  if not photo_response.ok:
+    abort(
+      photo_response.status_code,
+      description=f"Request to URL failed with: {photo_response.reason}",
+    )
+  raw_photo = photo_response.content
+  type_photo = photo_response.headers.get("Content-Type")
+  if not (type_photo and type_photo.startswith("image/")):
+    abort(
+      HTTPStatus.UNSUPPORTED_MEDIA_TYPE, description=f"Invalid file from URL: {url}"
+    )
+
+  # Return content using file storage
+  return FileStorage(
+    stream=BytesIO(raw_photo),
+    filename=str(url).rstrip("/").split("/")[-1],
+    content_type=type_photo,
+  )
