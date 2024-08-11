@@ -101,9 +101,9 @@ def build_image_from_url(url):
   )
 
 
-# helper function that returns a timestamp as an integer, no matter if day is inputed as a timestamp or day #
-# WARNING, do not enter a timestamp from BEFORE august 1st 2024.
-def calculate_date(day: str | int):
+# Helper function that returns a timestamp as an integer, where day is a timestamp or day number
+# WARNING: Do not enter a timestamp BEFORE August 1st 2024
+def calculate_date(day: str | int | None):
   if day is not None:
     if isinstance(day, str):
       day = int(day)
