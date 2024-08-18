@@ -2,7 +2,7 @@ from flask import Blueprint, abort, jsonify
 from imaginate_api.extensions import fs
 from imaginate_api.utils import build_result, calculate_date
 from http import HTTPStatus
-import base64
+from base64 import b64encode
 
 bp = Blueprint("date", __name__)
 
@@ -28,7 +28,7 @@ def images_by_date(day):
       document.status,
       document.filename,
     )
-    encoded_data = base64.b64encode(document.read())
+    encoded_data = b64encode(document.read())
     current_res["data"] = encoded_data.decode("utf-8")
     out.append(current_res)
   return jsonify(out)
