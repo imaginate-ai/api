@@ -9,6 +9,7 @@ from imaginate_api.utils import build_result, calculate_date
 from imaginate_api.schemas.date_info import DateInfo
 
 
+DIR = "aws"
 CWD = os.path.dirname(os.path.realpath(__file__))
 LAMBDA_LIBRARIES = """import os
 import json
@@ -21,7 +22,7 @@ from pymongo import MongoClient
 from gridfs import GridFS
 from bson.objectid import ObjectId
 """
-LAMBDA_SETUP = """db_name = 'imaginate_dev'
+LAMBDA_SETUP = """db_name = 'imaginate_dev' # Database names: ['imaginate_dev', 'imaginate_prod']
 conn_uri = os.environ.get('MONGO_TOKEN')
 client = MongoClient(conn_uri)
 db = client[db_name]
@@ -35,7 +36,7 @@ LAMBDA_FUNC = """def handler(event, context):
 """
 LAMBDA_SUBS = {
   "abort": "return {'statusCode': HTTPStatus.BAD_REQUEST, 'body': json.dumps('Invalid date')}",
-  "@bp.route": "",  # Remove this from function decorator
+  "@bp.route": "",  # Remove function decorator entirely
   "return jsonify": "return {'statusCode': HTTPStatus.OK, 'body': json.dumps(out)}",
 }
 
@@ -64,12 +65,15 @@ if __name__ == "__main__":
     source_function,
   ]
 
-  # Save a .py file of our Lambda function code (mainly for verification purposes)
-  with open("aws/index.py", "w") as f:
+  # Save our Lambda function code
+  with open(f"{DIR}/index.py", "w") as f:
     f.write(LAMBDA_LIBRARIES + "\n")  # Libaries defined as constants
     f.write(LAMBDA_SETUP + "\n")
     f.write("\n".join(all_functions) + "\n\n")  # Functions retrieved from source code
     f.write(LAMBDA_FUNC)
+
+  # Format our Lambda funtion code with ruff before packaging
+  subprocess.run("ruff format index.py", shell=True, cwd=CWD)
 
   # Following documentation from here:
   # https://www.mongodb.com/developer/products/atlas/awslambda-pymongo/
@@ -77,8 +81,8 @@ if __name__ == "__main__":
   subprocess.run(
     "pip install --upgrade --target ./dependencies pymongo", shell=True, cwd=CWD
   )
-  shutil.make_archive("aws", "zip", "aws/dependencies")
-  zf = zipfile.ZipFile("aws.zip", "a")
-  zf.write("aws/index.py", "index.py")
+  shutil.make_archive(f"{DIR}/aws", "zip", f"{DIR}/dependencies")
+  zf = zipfile.ZipFile(f"{DIR}/aws.zip", "a")
+  zf.write(f"{DIR}/index.py", "index.py")
   zf.close()
-  print("aws.zip successfully saved at root directory!")
+  print(f"aws.zip successfully saved in {DIR} directory")

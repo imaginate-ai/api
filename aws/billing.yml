@@ -1,0 +1,92 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CloudFormation template to monitor AWS Free Tier usage, budget limits, and billing thresholds, with email notifications.
+
+Parameters:
+  budgetLimit:
+    Type: Number
+    Default: 20
+    Description: Monthly limit - will be notified when exceeding 75% and 100% of input value in CAD
+  billingThreshold:
+    Type: Number
+    Default: 10
+    Description: Outstanding charges - will be notified when exceeding input value in CAD
+  emailAddress:
+    Type: String
+    AllowedPattern: '[^@]+@[^@]+\.[^@]+'
+    Default: email@example.com
+
+Resources:
+  notificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: BillingAndUsageNotifications
+      Subscription:
+        - Endpoint: !Ref emailAddress
+          Protocol: email
+  
+  freeTierAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: FreeTierExceeded
+      AlarmDescription: Triggers when AWS Free Tier limits are exceeded
+      MetricName: EstimatedCharges
+      Namespace: AWS/Billing
+      Statistic: Maximum
+      Period: 3600 # Check every hour
+      EvaluationPeriods: 1
+      Threshold: 0.01
+      ComparisonOperator: GreaterThanThreshold
+      AlarmActions:
+        - Ref: notificationTopic
+      Dimensions:
+        - Name: Currency
+          Value: CAD
+
+  billingAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: BillingThresholdExceeded
+      AlarmDescription: Triggers when the AWS bill exceeds the specified threshold
+      MetricName: EstimatedCharges
+      Namespace: AWS/Billing
+      Statistic: Maximum
+      Period: 3600 # Check every hour
+      EvaluationPeriods: 1
+      Threshold: !Ref billingThreshold
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      AlarmActions:
+        - Ref: notificationTopic
+      Dimensions:
+        - Name: Currency
+          Value: CAD
+
+  monthlyBudget:
+    Type: AWS::Budgets::Budget
+    Properties:
+      Budget:
+        BudgetName: MonthlyBudgetLimit
+        BudgetLimit:
+          Amount: !Ref budgetLimit
+          Unit: CAD
+        TimeUnit: MONTHLY
+        BudgetType: COST
+        CostFilters: {}
+        CostTypes:
+          IncludeTax: true
+          IncludeSubscription: true
+          UseBlended: false
+      NotificationsWithSubscribers:
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: 75 # 75% of budget is used
+          Subscribers:
+            - SubscriptionType: EMAIL
+              Address: !Ref emailAddress
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: 100 # 100% of budget is used
+          Subscribers:
+            - SubscriptionType: EMAIL
+              Address: !Ref emailAddress

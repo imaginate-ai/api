@@ -9,7 +9,7 @@ from pymongo import MongoClient
 from gridfs import GridFS
 from bson.objectid import ObjectId
 
-db_name = "imaginate_dev"
+db_name = "imaginate_dev"  # Database names: ['imaginate_dev', 'imaginate_prod']
 conn_uri = os.environ.get("MONGO_TOKEN")
 client = MongoClient(conn_uri)
 db = client[db_name]
@@ -73,6 +73,7 @@ def handler(event, context):
   if (
     event
     and "queryStringParameters" in event
+    and event["queryStringParameters"]
     and "day" in event["queryStringParameters"]
   ):
     return images_by_date(event["queryStringParameters"]["day"])

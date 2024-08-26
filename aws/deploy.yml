@@ -1,6 +1,6 @@
 # Sourced from: https://gist.github.com/magnetikonline/c314952045eee8e8375b82bc7ec68e88
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Imaginate API Gateway and Lambda function
+Description: CloudFormation template to build an API Gateway and Lambda function
 
 Parameters:
   apiGatewayName:
@@ -16,7 +16,7 @@ Parameters:
   lambdaFunctionName:
     Type: String
     AllowedPattern: '[a-zA-Z0-9]+[a-zA-Z0-9-]+[a-zA-Z0-9]+'
-    Default: get-images
+    Default: GetImages
   mongoToken:
     Type: String
     NoEcho: true
