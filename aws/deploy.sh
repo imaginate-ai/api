@@ -30,3 +30,5 @@ aws cloudformation package --template-file aws/deploy.yml --s3-bucket $BUCKET_NA
 ls aws
 echo "Deploying..."
 aws cloudformation deploy --template-file aws/packaged-deploy.yml --stack-name $STACK_NAME --capabilities CAPABILITY_NAMED_IAM --region $REGION --profile $PROFILE --parameter-overrides mongoToken=$MONGO_TOKEN
+echo "Check status..."
+aws cloudformation describe-stacks --stack-name $STACK_NAME --region $REGION --profile $PROFILE --query "Stacks[0].StackStatus" --output text
