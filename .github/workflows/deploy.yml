@@ -52,6 +52,6 @@ jobs:
           aws_secret_access_key = ${{ secrets.DEV_KEY }}
           EOF
       - name: Build Lambda code
-        run: python aws/build_lambda_code.py
+        run: poetry run python aws/build_lambda_code.py
       - name: Deploy stack
         run: ./aws/deploy.sh
