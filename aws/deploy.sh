@@ -10,9 +10,15 @@ PROFILE="dev"
 source .env
 
 # Load first argument as MONGO_TOKEN if passed
-if [ "$#" -lt 1 ]
-then
+if [ "$1" ]; then
+  echo "Loading MONGO_TOKEN..."
   MONGO_TOKEN=$1
+fi
+
+# Make sure MONGO_TOKEN is not empty
+if [ "$MONGO_TOKEN" = "" ]; then
+  echo "MONGO_TOKEN is empty"
+  exit 1
 fi
 
 # AWS build/deploy
