@@ -12,6 +12,8 @@ jobs:
           cache: "pip"
       - name: Display Python version
         run: python -c "import sys; print(sys.version)"
+      - name: Display AWS CLI version
+        run: aws --version
       - name: Restore cached .venv
         uses: actions/cache/restore@v4
         id: cache-venv
