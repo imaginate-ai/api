@@ -23,13 +23,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry
           poetry config --list
-      # - name: Install AWS CLI V2
-      #   run: |
-      #     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip
-      #     unzip -q /tmp/awscliv2.zip -d /tmp
-      #     rm /tmp/awscliv2.zip
-      #     sudo /tmp/aws/install --update
-      #     rm -rf /tmp/aws/
       - name: Install dependencies
         if: steps.cache-venv.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
@@ -64,4 +57,4 @@ jobs:
         shell: bash
         run: |
           chmod +x ./aws/deploy.sh
-          ./aws/deploy.sh
+          ./aws/deploy.sh ${{ secrets.MONGO_TOKEN }}

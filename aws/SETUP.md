@@ -35,3 +35,4 @@ aws_secret_access_key = <dev_key>
 
 ## Documentation
 - [AWS authentication and access credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-authentication-user.html)
+- Viewing Lambda code: `aws lambda get-function --function-name <FUNCTION_NAME> --query 'Code.Location'`

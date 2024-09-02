@@ -1,4 +1,6 @@
 #!/bin/bash
+
+# Static variables
 BUCKET_NAME="imaginate-templates-bucket"
 STACK_NAME="imaginate"
 REGION="us-east-1"
@@ -6,6 +8,12 @@ PROFILE="dev"
 
 # Read environment variables
 source .env
+
+# Load first argument as MONGO_TOKEN if passed
+if [ "$#" -lt 1 ]
+then
+  MONGO_TOKEN=$1
+fi
 
 # AWS build/deploy
 echo "Fetching bucket..."
