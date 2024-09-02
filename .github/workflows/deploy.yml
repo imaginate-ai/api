@@ -54,4 +54,7 @@ jobs:
       - name: Build Lambda code
         run: poetry run python aws/build_lambda_code.py
       - name: Deploy stack
-        run: ./aws/deploy.sh
+        shell: bash
+        run: |
+          chmod +x ./aws/deploy.sh
+          ./aws/deploy.sh
