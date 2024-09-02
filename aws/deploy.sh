@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Static variables
 BUCKET_NAME="imaginate-templates-bucket"
