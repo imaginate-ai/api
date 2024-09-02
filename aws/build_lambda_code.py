@@ -9,6 +9,7 @@ from imaginate_api.utils import build_result, calculate_date
 from imaginate_api.schemas.date_info import DateInfo
 
 
+ENV = "dev"
 DIR = "aws"
 CWD = os.path.dirname(os.path.realpath(__file__))
 LAMBDA_LIBRARIES = """import os
@@ -22,7 +23,7 @@ from pymongo import MongoClient
 from gridfs import GridFS
 from bson.objectid import ObjectId
 """
-LAMBDA_SETUP = """db_name = 'imaginate_dev' # Database names: ['imaginate_dev', 'imaginate_prod']
+LAMBDA_SETUP = f"""db_name = 'imaginate_{ENV}' # Database names: ['imaginate_dev', 'imaginate_prod']
 conn_uri = os.environ.get('MONGO_TOKEN')
 client = MongoClient(conn_uri)
 db = client[db_name]

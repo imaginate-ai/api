@@ -10,22 +10,23 @@ Parameters:
 Resources:
   devUser:
     Type: AWS::IAM::User
+    DependsOn:
+      - devUserSecret
     Properties:
       UserName: !Ref devUserName
-      Policies:
-        - PolicyName: AssumeLambdaRolePolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action: sts:AssumeRole
-                Resource: !GetAtt lambdaFullAccessRole.Arn
+      LoginProfile:
+        Password: !Sub '{{resolve:secretsmanager:${devUserName}Password}}'
+        PasswordResetRequired: false
 
-  devUserAccessKey:
-    Type: AWS::IAM::AccessKey
+  devUserSecret:
+    Type: AWS::SecretsManager::Secret
     Properties:
-      UserName: !Ref devUser
-      Status: Active
+      Name: !Sub ${devUserName}Password
+      GenerateSecretString:
+        PasswordLength: 32
+        ExcludeCharacters: '"@/\'
+        IncludeSpace: false
+        RequireEachIncludedType: true
 
   lambdaFullAccessRole:
     Type: AWS::IAM::Role
@@ -43,13 +44,21 @@ Resources:
               AWS: !GetAtt devUser.Arn
             Action: sts:AssumeRole
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AWSLambda_FullAccess
+        - arn:aws:iam::aws:policy/AdministratorAccess
       RoleName: LambdaFullAccessRole
+
+  devUserAccessKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref devUser
+      Status: Active
   
 Outputs:
   devUserAccessKeyId:
-    Value: !Ref DevUserAccessKey
+    Value: !Ref devUserAccessKey
   devUserAccessKeyPass:
-    Value: !GetAtt DevUserAccessKey.SecretAccessKey
+    Value: !GetAtt devUserAccessKey.SecretAccessKey
+  devUserName:
+    Value: !Ref devUser
   lambdaFullAccessRoleArn:
     Value: !GetAtt lambdaFullAccessRole.Arn

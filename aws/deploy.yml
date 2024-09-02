@@ -60,10 +60,7 @@ Resources:
   lambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
-      Code:
-        ZipFile: |
-          def handler(event, context):
-            pass
+      Code: aws.zip
       Description: Get images by date
       FunctionName: !Ref lambdaFunctionName
       Handler: index.handler

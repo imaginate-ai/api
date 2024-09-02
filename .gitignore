@@ -7,3 +7,4 @@
 junit
 aws/dependencies
 *.zip
+packaged*

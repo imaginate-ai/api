@@ -5,15 +5,18 @@ Parameters:
   budgetLimit:
     Type: Number
     Default: 20
-    Description: Monthly limit - will be notified when exceeding 75% and 100% of input value in CAD
+    Description: Monthly limit - will be notified when exceeding 75% and 100% of input value in USD
   billingThreshold:
     Type: Number
     Default: 10
-    Description: Outstanding charges - will be notified when exceeding input value in CAD
+    Description: Outstanding charges - will be notified when exceeding input value in USD
   emailAddress:
     Type: String
     AllowedPattern: '[^@]+@[^@]+\.[^@]+'
     Default: email@example.com
+  currency:
+    Type: String
+    Default: USD
 
 Resources:
   notificationTopic:
@@ -40,7 +43,7 @@ Resources:
         - Ref: notificationTopic
       Dimensions:
         - Name: Currency
-          Value: CAD
+          Value: !Ref currency
 
   billingAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -58,7 +61,7 @@ Resources:
         - Ref: notificationTopic
       Dimensions:
         - Name: Currency
-          Value: CAD
+          Value: !Ref currency
 
   monthlyBudget:
     Type: AWS::Budgets::Budget
@@ -67,7 +70,7 @@ Resources:
         BudgetName: MonthlyBudgetLimit
         BudgetLimit:
           Amount: !Ref budgetLimit
-          Unit: CAD
+          Unit: !Ref currency
         TimeUnit: MONTHLY
         BudgetType: COST
         CostFilters: {}
