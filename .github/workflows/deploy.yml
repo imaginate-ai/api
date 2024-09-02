@@ -56,7 +56,7 @@ jobs:
       - name: Build Lambda code
         run: poetry run python aws/build_lambda_code.py
       - name: Deploy stack
-        shell: bash
+        shell: bash -l {0}
         run: |
           chmod +x ./aws/deploy.sh
           ./aws/deploy.sh ${{ secrets.MONGO_TOKEN }}
