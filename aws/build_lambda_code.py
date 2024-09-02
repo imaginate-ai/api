@@ -1,3 +1,8 @@
+import sys
+
+sys.path.append(
+  "."
+)  # Adds all root directories as a package, which in our case is: imaginate_api
 import inspect
 import re
 import os
