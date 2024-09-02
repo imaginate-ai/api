@@ -60,3 +60,4 @@ jobs:
         run: |
           chmod +x ./aws/deploy.sh
           ./aws/deploy.sh ${{ secrets.MONGO_TOKEN }}
+          wait
