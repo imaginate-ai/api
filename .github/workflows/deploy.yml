@@ -1,0 +1,63 @@
+name: Deploy Pipeline
+on: [workflow_dispatch]
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+      - name: Display AWS CLI version
+        run: aws --version
+      - name: Restore cached .venv
+        uses: actions/cache/restore@v4
+        id: cache-venv
+        with:
+          key: venv-${{ runner.os }}-${{ hashFiles('poetry.lock') }}
+          path: .venv
+      - name: Setup environment
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          poetry config --list
+      - name: Install dependencies
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+      - name: Cache .venv
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          key: venv-${{ runner.os }}-${{ hashFiles('poetry.lock') }}
+          path: .venv
+      - name: Create .env
+        uses: SpicyPizza/create-envfile@v2.0
+        with:
+          envkey_DEV: "dev"
+          envkey_MONGO_TOKEN: ${{ secrets.MONGO_TOKEN }}
+          file_name: .env
+      - name: AWS Setup
+        run: |
+          mkdir -p ~/.aws
+          cat > ~/.aws/config << EOF
+          [profile dev]
+          role_arn = ${{ secrets.LAMBDA_ARN }}
+          source_profile = default
+          EOF
+          cat > ~/.aws/credentials << EOF
+          [default]
+          aws_access_key_id = ${{ secrets.DEV_ID }}
+          aws_secret_access_key = ${{ secrets.DEV_KEY }}
+          EOF
+      - name: Build Lambda code
+        run: poetry run python aws/build_lambda_code.py
+      - name: Deploy stack
+        shell: bash
+        run: |
+          chmod +x ./aws/deploy.sh
+          ./aws/deploy.sh ${{ secrets.MONGO_TOKEN }}
+          wait

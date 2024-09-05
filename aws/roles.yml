@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CloudFormation template to build an API Gateway and Lambda function
+
+Parameters:
+  devUserName:
+    Type: String
+    AllowedPattern: '[a-z0-9]+'
+    Default: dev
+
+Resources:
+  devUser:
+    Type: AWS::IAM::User
+    DependsOn:
+      - devUserSecret
+    Properties:
+      UserName: !Ref devUserName
+      LoginProfile:
+        Password: !Sub '{{resolve:secretsmanager:${devUserName}Password}}'
+        PasswordResetRequired: false
+
+  devUserSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub ${devUserName}Password
+      GenerateSecretString:
+        PasswordLength: 32
+        ExcludeCharacters: '"@/\'
+        IncludeSpace: false
+        RequireEachIncludedType: true
+
+  lambdaFullAccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: sts:AssumeRole
+          - Effect: Allow
+            Principal:
+              AWS: !GetAtt devUser.Arn
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+      RoleName: LambdaFullAccessRole
+
+  devUserAccessKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref devUser
+      Status: Active
+  
+Outputs:
+  devUserAccessKeyId:
+    Value: !Ref devUserAccessKey
+  devUserAccessKeyPass:
+    Value: !GetAtt devUserAccessKey.SecretAccessKey
+  devUserName:
+    Value: !Ref devUser
+  lambdaFullAccessRoleArn:
+    Value: !GetAtt lambdaFullAccessRole.Arn

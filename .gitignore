@@ -5,3 +5,6 @@
 .pytest_cache
 .ruff_cache
 junit
+aws/dependencies
+*.zip
+packaged*
