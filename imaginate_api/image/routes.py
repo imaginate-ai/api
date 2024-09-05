@@ -119,7 +119,7 @@ def update_status():
         return "new status not recieved",400  
     return "status updated",200
 
-@bp.route("/delete_rejected", methods=["DELETE"])
+@bp.route("/delete-rejected", methods=["DELETE"])
 def delete_rejected():
     filter = {"status":"rejected"}
     results = db["fs.files"].delete_many(filter)
