@@ -1,5 +1,7 @@
-from flask import Blueprint, jsonify, make_response, request
-from imaginate_api.extensions import fs
+import base64
+from bson import ObjectId
+from flask import Blueprint, jsonify, make_response, render_template, request
+from imaginate_api.extensions import fs, db
 from image_handler_client.schemas.image_info import ImageStatus
 from imaginate_api.utils import (
   validate_id,
@@ -92,3 +94,33 @@ def delete_image(id):
   info = build_result(res._id, res_real, res_date, res_theme, res_status, res_filename)
   fs.delete(res._id)
   return jsonify(info)
+
+#Image Verification Routes
+
+@bp.route("/verification-portal", methods=["GET"])
+def verification_portal():
+    obj = db['fs.files'].find_one({'status': ImageStatus.UNVERIFIED.value})
+    print(obj)
+    if obj:
+        grid_out = fs.find_one({"_id":obj['_id']})
+        data = grid_out.read()
+        base64_data = base64.b64encode(data).decode('ascii')
+        return render_template('verification_portal.html', id=obj['_id'], img_found=True, img_src=base64_data, obj_data=obj)
+    return render_template('verification_portal.html', img_found=False)
+
+@bp.route("/update-status", methods=["POST"])
+def update_status():
+    status = request.form['status']
+    if status:
+        query_filter = { '_id': ObjectId(request.form['_id']) }
+        update_operation = { "$set" : { "status" : status } }
+        db['fs.files'].find_one_and_update(query_filter, update_operation)
+    else:
+        return "new status not recieved",400  
+    return "status updated",200
+
+@bp.route("/delete-rejected", methods=["DELETE"])
+def delete_rejected():
+    filter = {"status":"rejected"}
+    results = db["fs.files"].delete_many(filter)
+    return results, 200
