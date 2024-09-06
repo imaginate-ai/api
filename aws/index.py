@@ -9,7 +9,7 @@ from pymongo import MongoClient
 from gridfs import GridFS
 from bson.objectid import ObjectId
 
-db_name = "imaginate_dev"  # Database names: ['imaginate_dev', 'imaginate_prod']
+db_name = "imaginate_prod"  # Database names: ['imaginate_dev', 'imaginate_prod']
 conn_uri = os.environ.get("MONGO_TOKEN")
 client = MongoClient(conn_uri)
 db = client[db_name]

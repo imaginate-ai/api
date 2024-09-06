@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: CloudFormation template to build an API Gateway and Lambda function
+Description: CloudFormation template to generate IAM development user and administrator role
 
 Parameters:
   devUserName:

@@ -14,7 +14,7 @@ from imaginate_api.utils import build_result, calculate_date
 from imaginate_api.schemas.date_info import DateInfo
 
 
-ENV = "dev"
+ENV = "prod"
 DIR = "aws"
 CWD = os.path.dirname(os.path.realpath(__file__))
 LAMBDA_LIBRARIES = """import os

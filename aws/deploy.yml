@@ -25,7 +25,6 @@ Resources:
   apiGateway:
     Type: AWS::ApiGateway::RestApi
     Properties:
-      Description: Example API Gateway
       EndpointConfiguration:
         Types:
           - REGIONAL
@@ -56,6 +55,22 @@ Resources:
     Properties:
       RestApiId: !Ref apiGateway
       StageName: !Ref apiGatewayStageName
+    
+  apiGatewayPlan:
+    Type: AWS::ApiGateway::UsagePlan
+    DependsOn:
+      - apiGatewayDeployment
+    Properties:
+      ApiStages: 
+        - ApiId: !Ref apiGateway
+          Stage: !Ref apiGatewayStageName
+      Quota: 
+        Limit: 1000000 # Free tier limit
+        Period: MONTH
+      Throttle: 
+        BurstLimit: 100
+        RateLimit: 50
+      UsagePlanName: !Sub ${apiGatewayName}Plan
 
   lambdaFunction:
     Type: AWS::Lambda::Function
