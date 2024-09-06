@@ -11,7 +11,12 @@ bp = Blueprint("date", __name__)
 @bp.route("/<day>/images")
 def images_by_date(day):
   try:
-    date = calculate_date(day)
+    # This code is from GET /date/latest and is NOT internally called for aws/build_lambda_code.py
+    res = next(fs.find().sort({"date": -1}).limit(1), None)  # Descending sort
+    if not res:
+      abort(HTTPStatus.NOT_FOUND, description="Empty database")
+
+    date = calculate_date(day, res.date)
     if not date:
       abort(HTTPStatus.BAD_REQUEST, description="Invalid date")
   except ValueError:
