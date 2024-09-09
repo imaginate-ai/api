@@ -68,8 +68,8 @@ Resources:
         Limit: 1000000 # Free tier limit
         Period: MONTH
       Throttle: 
-        BurstLimit: 100
-        RateLimit: 50
+        BurstLimit: 20
+        RateLimit: 10
       UsagePlanName: !Sub ${apiGatewayName}Plan
 
   lambdaFunction:
