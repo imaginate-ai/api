@@ -6,6 +6,12 @@ from base64 import b64encode
 
 bp = Blueprint("date", __name__)
 
+# Explanation of our employed dating system:
+# - Days can be entered by ID or by timestamp
+# - Valid timestamps are the start of a new day (i.e. midnight) while IDs are simply numbered as increasing integers starting from zero
+# - IDs are the set of natural numbers (including zero) and are converted to timestamp using a start date of (for example) September 1st 2024
+#   - Examples: ID: 0 -> Date: September 1st 2024; ID: 1 -> Date: September 2nd 2024; ID: 10 -> Date: September 11th 2024
+
 
 # GET /date/<day>/images: used for viewing images of a specified date
 @bp.route("/<day>/images")
