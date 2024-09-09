@@ -6,12 +6,23 @@ from base64 import b64encode
 
 bp = Blueprint("date", __name__)
 
+# Explanation of our employed dating system:
+# - Days can be entered by ID or by timestamp
+# - Valid timestamps are the start of a new day (i.e. midnight) while IDs are simply numbered as increasing integers starting from zero
+# - IDs are the set of natural numbers (including zero) and are converted to timestamp using a start date of (for example) September 1st 2024
+#   - Examples: ID: 0 -> Date: September 1st 2024; ID: 1 -> Date: September 2nd 2024; ID: 10 -> Date: September 11th 2024
+
 
 # GET /date/<day>/images: used for viewing images of a specified date
 @bp.route("/<day>/images")
 def images_by_date(day):
   try:
-    date = calculate_date(day)
+    # This code is from GET /date/latest and is NOT internally called for aws/build_lambda_code.py
+    res = next(fs.find().sort({"date": -1}).limit(1), None)  # Descending sort
+    if not res:
+      abort(HTTPStatus.NOT_FOUND, description="Empty database")
+
+    date = calculate_date(day, res.date)
     if not date:
       abort(HTTPStatus.BAD_REQUEST, description="Invalid date")
   except ValueError:

@@ -14,7 +14,7 @@ from imaginate_api.utils import build_result, calculate_date
 from imaginate_api.schemas.date_info import DateInfo
 
 
-ENV = "dev"
+ENV = "prod"
 DIR = "aws"
 CWD = os.path.dirname(os.path.realpath(__file__))
 LAMBDA_LIBRARIES = """import os
@@ -41,7 +41,8 @@ LAMBDA_FUNC = """def handler(event, context):
         return {'statusCode': HTTPStatus.BAD_REQUEST, 'body': json.dumps('Invalid date')}
 """
 LAMBDA_SUBS = {
-  "abort": "return {'statusCode': HTTPStatus.BAD_REQUEST, 'body': json.dumps('Invalid date')}",
+  "abort\\(HTTPStatus.BAD_REQUEST": "return {'statusCode': HTTPStatus.BAD_REQUEST, 'body': json.dumps('Invalid date')}",
+  "abort\\(HTTPStatus.NOT_FOUND": "return {'statusCode': HTTPStatus.NOT_FOUND, 'body': json.dumps('Empty database')}",
   "@bp.route": "",  # Remove function decorator entirely
   "return jsonify": "return {'statusCode': HTTPStatus.OK, 'body': json.dumps(out)}",
 }

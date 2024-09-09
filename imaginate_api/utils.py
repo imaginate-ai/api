@@ -102,12 +102,26 @@ def build_image_from_url(url):
 
 
 # Helper function that returns a timestamp as an integer, where day is a timestamp or day number
-# WARNING: Do not enter a timestamp BEFORE August 1st 2024
-def calculate_date(day: str | int | None):
+# WARNING: Do not enter a timestamp BEFORE September 1st 2024
+def calculate_date(day: str | int | None, latest_day=None):
   if day is not None:
+    print(f"Inputted day is: {day}")
     if isinstance(day, str):
       day = int(day)
+
+    # Covert date to timestamp
     if day >= DateInfo.START_DATE.value:
-      return day
-    return DateInfo.START_DATE.value + day * DateInfo.SECONDS_PER_DAY.value
+      timestamp_day = day
+    else:
+      timestamp_day = DateInfo.START_DATE.value + day * DateInfo.SECONDS_PER_DAY.value
+
+    # Check if circular behaviour was requested
+    if latest_day is None:
+      return timestamp_day
+
+    MIN = DateInfo.START_DATE.value
+    MAX = latest_day + DateInfo.SECONDS_PER_DAY.value
+    timestamp_day = (timestamp_day - MIN) % (MAX - MIN) + MIN
+    print(f"Circular date with range: [{MIN}, {MAX}] and value: {timestamp_day}")
+    return timestamp_day
   return None
