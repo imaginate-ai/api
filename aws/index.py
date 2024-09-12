@@ -15,7 +15,7 @@ client = MongoClient(conn_uri)
 db = client[db_name]
 fs = GridFS(db)
 headers = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": "https://playimaginate.com",
   "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
   "Access-Control-Allow-Methods": "GET,OPTIONS",
 }
