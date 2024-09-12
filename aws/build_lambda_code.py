@@ -15,6 +15,7 @@ from imaginate_api.schemas.date_info import DateInfo
 
 
 ENV = "prod"
+FRONTEND_URL = "https://playimaginate.com"
 DIR = "aws"
 CWD = os.path.dirname(os.path.realpath(__file__))
 LAMBDA_LIBRARIES = """import os
@@ -33,18 +34,23 @@ conn_uri = os.environ.get('MONGO_TOKEN')
 client = MongoClient(conn_uri)
 db = client[db_name]
 fs = GridFS(db)
+headers = {{
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+    'Access-Control-Allow-Methods': 'GET,OPTIONS'
+}}
 """
 LAMBDA_FUNC = """def handler(event, context):
     if event and 'queryStringParameters' in event and event['queryStringParameters'] and 'day' in event['queryStringParameters']:
         return images_by_date(event['queryStringParameters']['day'])
     else:
-        return {'statusCode': HTTPStatus.BAD_REQUEST, 'body': json.dumps('Invalid date')}
+        return {'statusCode': HTTPStatus.BAD_REQUEST, 'body': json.dumps('Invalid date'), 'headers': headers}
 """
 LAMBDA_SUBS = {
-  "abort\\(HTTPStatus.BAD_REQUEST": "return {'statusCode': HTTPStatus.BAD_REQUEST, 'body': json.dumps('Invalid date')}",
-  "abort\\(HTTPStatus.NOT_FOUND": "return {'statusCode': HTTPStatus.NOT_FOUND, 'body': json.dumps('Empty database')}",
+  "abort\\(HTTPStatus.BAD_REQUEST": "return {'statusCode': HTTPStatus.BAD_REQUEST, 'body': json.dumps('Invalid date'), 'headers': headers}",
+  "abort\\(HTTPStatus.NOT_FOUND": "return {'statusCode': HTTPStatus.NOT_FOUND, 'body': json.dumps('Empty database'), 'headers': headers}",
   "@bp.route": "",  # Remove function decorator entirely
-  "return jsonify": "return {'statusCode': HTTPStatus.OK, 'body': json.dumps(out)}",
+  "return jsonify": "return {'statusCode': HTTPStatus.OK, 'body': json.dumps(out), 'headers': headers}",
 }
 
 

@@ -14,6 +14,11 @@ conn_uri = os.environ.get("MONGO_TOKEN")
 client = MongoClient(conn_uri)
 db = client[db_name]
 fs = GridFS(db)
+headers = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
+  "Access-Control-Allow-Methods": "GET,OPTIONS",
+}
 
 
 class DateInfo(Enum):
@@ -63,13 +68,25 @@ def images_by_date(day):
     # This code is from GET /date/latest and is NOT internally called for aws/build_lambda_code.py
     res = next(fs.find().sort({"date": -1}).limit(1), None)  # Descending sort
     if not res:
-      return {"statusCode": HTTPStatus.NOT_FOUND, "body": json.dumps("Empty database")}
+      return {
+        "statusCode": HTTPStatus.NOT_FOUND,
+        "body": json.dumps("Empty database"),
+        "headers": headers,
+      }
 
     date = calculate_date(day, res.date)
     if not date:
-      return {"statusCode": HTTPStatus.BAD_REQUEST, "body": json.dumps("Invalid date")}
+      return {
+        "statusCode": HTTPStatus.BAD_REQUEST,
+        "body": json.dumps("Invalid date"),
+        "headers": headers,
+      }
   except ValueError:
-    return {"statusCode": HTTPStatus.BAD_REQUEST, "body": json.dumps("Invalid date")}
+    return {
+      "statusCode": HTTPStatus.BAD_REQUEST,
+      "body": json.dumps("Invalid date"),
+      "headers": headers,
+    }
 
   res = fs.find({"date": date})
   out = []
@@ -85,7 +102,7 @@ def images_by_date(day):
     encoded_data = b64encode(document.read())
     current_res["data"] = encoded_data.decode("utf-8")
     out.append(current_res)
-  return {"statusCode": HTTPStatus.OK, "body": json.dumps(out)}
+  return {"statusCode": HTTPStatus.OK, "body": json.dumps(out), "headers": headers}
 
 
 def handler(event, context):
@@ -97,4 +114,8 @@ def handler(event, context):
   ):
     return images_by_date(event["queryStringParameters"]["day"])
   else:
-    return {"statusCode": HTTPStatus.BAD_REQUEST, "body": json.dumps("Invalid date")}
+    return {
+      "statusCode": HTTPStatus.BAD_REQUEST,
+      "body": json.dumps("Invalid date"),
+      "headers": headers,
+    }
