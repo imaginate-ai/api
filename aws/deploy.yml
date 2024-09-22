@@ -1,77 +1,19 @@
-# Sourced from: https://gist.github.com/magnetikonline/c314952045eee8e8375b82bc7ec68e88
 AWSTemplateFormatVersion: "2010-09-09"
-Description: CloudFormation template to build an API Gateway and Lambda function
+Description: CloudFormation template to build an AWS Lambda function with a deployment URL and rate limiting.
 
 Parameters:
-  apiGatewayName:
-    Type: String
-    Default: ImaginateApi
-  apiGatewayStageName:
-    Type: String
-    AllowedPattern: '[a-z0-9]+'
-    Default: call
-  apiGatewayHTTPMethod:
-    Type: String
-    Default: GET
   lambdaFunctionName:
     Type: String
     AllowedPattern: '[a-zA-Z0-9]+[a-zA-Z0-9-]+[a-zA-Z0-9]+'
     Default: GetImages
+  lambdaHTTPMethod:
+    Type: String
+    Default: GET
   mongoToken:
     Type: String
     NoEcho: true
 
 Resources:
-  apiGateway:
-    Type: AWS::ApiGateway::RestApi
-    Properties:
-      EndpointConfiguration:
-        Types:
-          - REGIONAL
-      Name: !Ref apiGatewayName
-
-  apiGatewayRootMethod:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      AuthorizationType: NONE
-      RequestParameters:
-        method.request.querystring.day: true
-      HttpMethod: !Ref apiGatewayHTTPMethod
-      Integration:
-        IntegrationHttpMethod: POST
-        Type: AWS_PROXY
-        RequestParameters:
-          integration.request.querystring.day: method.request.querystring.day
-        Uri: !Sub
-          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations
-          - lambdaArn: !GetAtt lambdaFunction.Arn
-      ResourceId: !GetAtt apiGateway.RootResourceId
-      RestApiId: !Ref apiGateway
-
-  apiGatewayDeployment:
-    Type: AWS::ApiGateway::Deployment
-    DependsOn:
-      - apiGatewayRootMethod
-    Properties:
-      RestApiId: !Ref apiGateway
-      StageName: !Ref apiGatewayStageName
-    
-  apiGatewayPlan:
-    Type: AWS::ApiGateway::UsagePlan
-    DependsOn:
-      - apiGatewayDeployment
-    Properties:
-      ApiStages: 
-        - ApiId: !Ref apiGateway
-          Stage: !Ref apiGatewayStageName
-      Quota: 
-        Limit: 1000000 # Free tier limit
-        Period: MONTH
-      Throttle: 
-        BurstLimit: 20
-        RateLimit: 10
-      UsagePlanName: !Sub ${apiGatewayName}Plan
-
   lambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
@@ -84,16 +26,27 @@ Resources:
       Environment:
         Variables:
           MONGO_TOKEN: !Ref mongoToken
+      # Employs a rate limiting scheme of ~10, which is what the default is on account level, so this is not needed
+      # ReservedConcurrentExecutions: 10
 
-  lambdaApiGatewayInvoke:
+  lambdaFunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      AuthType: NONE
+      TargetFunctionArn: !GetAtt lambdaFunction.Arn
+      Cors:
+        AllowOrigins:
+          - "*"
+        AllowMethods:
+          - !Ref lambdaHTTPMethod
+
+  lambdaPermission:
     Type: AWS::Lambda::Permission
     Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !GetAtt lambdaFunction.Arn
-      Principal: apigateway.amazonaws.com
-      # NOTE: If the route is NOT at API Gateway root, `SourceArn` would take the form of:
-      # arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiGateway}/${apiGatewayStageName}/${apiGatewayHTTPMethod}/PATH_PART
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiGateway}/${apiGatewayStageName}/${apiGatewayHTTPMethod}/
+      Action: lambda:InvokeFunctionUrl
+      FunctionName: !Ref lambdaFunctionName
+      Principal: '*'
+      FunctionUrlAuthType: NONE
 
   lambdaIAMRole:
     Type: AWS::IAM::Role
@@ -127,7 +80,6 @@ Resources:
       RetentionInDays: 90
 
 Outputs:
-  apiGatewayInvokeURL:
-    Value: !Sub https://${apiGateway}.execute-api.${AWS::Region}.amazonaws.com/${apiGatewayStageName}
-  lambdaArn:
-    Value: !GetAtt lambdaFunction.Arn
+  lambdaInvokeURL:
+    Description: The URL to invoke the Lambda function directly
+    Value: !GetAtt lambdaFunctionUrl.FunctionUrl
