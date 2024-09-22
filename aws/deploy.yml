@@ -34,11 +34,6 @@ Resources:
     Properties:
       AuthType: NONE
       TargetFunctionArn: !GetAtt lambdaFunction.Arn
-      Cors:
-        AllowOrigins:
-          - "*"
-        AllowMethods:
-          - !Ref lambdaHTTPMethod
 
   lambdaPermission:
     Type: AWS::Lambda::Permission
