@@ -44,7 +44,7 @@ def upload():
     request.form.get("theme"),
     request.form.get("real"),
   )
-  status = ImageStatus.UNVERIFIED.value
+  status = ImageStatus(request.form.get("status", ImageStatus.UNVERIFIED)).value
   _id = fs.put(
     file.stream.read(),
     filename=file.filename,
