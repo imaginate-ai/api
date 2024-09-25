@@ -13,6 +13,11 @@ def get_db_env():
   elif env.lower() not in VALID_ENVS:
     print(f"Environment should be one of: {VALID_ENVS}", file=sys.stderr)
     sys.exit(1)
+
+  if env.lower() == "prod":
+    choice = input("You are about to connect to the production database. Enter 'y' to continue...")
+    if choice != "y":
+      sys.exit(1)
   return env.lower()
 
 
