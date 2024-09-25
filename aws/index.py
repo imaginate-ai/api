@@ -14,11 +14,7 @@ conn_uri = os.environ.get("MONGO_TOKEN")
 client = MongoClient(conn_uri)
 db = client[db_name]
 fs = GridFS(db)
-headers = {
-  "Access-Control-Allow-Origin": "https://playimaginate.com",
-  "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
-  "Access-Control-Allow-Methods": "GET,OPTIONS",
-}
+allowed_origins = ["vermillion-biscuit-931b88.netlify.app"]
 
 
 class DateInfo(Enum):
@@ -68,25 +64,13 @@ def images_by_date(day):
     # This code is from GET /date/latest and is NOT internally called for aws/build_lambda_code.py
     res = next(fs.find().sort({"date": -1}).limit(1), None)  # Descending sort
     if not res:
-      return {
-        "statusCode": HTTPStatus.NOT_FOUND,
-        "body": json.dumps("Empty database"),
-        "headers": headers,
-      }
+      return {"statusCode": HTTPStatus.NOT_FOUND, "body": json.dumps("Empty database")}
 
     date = calculate_date(day, res.date)
     if not date:
-      return {
-        "statusCode": HTTPStatus.BAD_REQUEST,
-        "body": json.dumps("Invalid date"),
-        "headers": headers,
-      }
+      return {"statusCode": HTTPStatus.BAD_REQUEST, "body": json.dumps("Invalid date")}
   except ValueError:
-    return {
-      "statusCode": HTTPStatus.BAD_REQUEST,
-      "body": json.dumps("Invalid date"),
-      "headers": headers,
-    }
+    return {"statusCode": HTTPStatus.BAD_REQUEST, "body": json.dumps("Invalid date")}
 
   res = fs.find({"date": date})
   out = []
@@ -102,17 +86,31 @@ def images_by_date(day):
     encoded_data = b64encode(document.read())
     current_res["data"] = encoded_data.decode("utf-8")
     out.append(current_res)
-  return {"statusCode": HTTPStatus.OK, "body": json.dumps(out), "headers": headers}
+  return {"statusCode": HTTPStatus.OK, "body": json.dumps(out)}
 
 
 def handler(event, context):
+  print("Headers:", event["headers"])
+  origin = event["headers"].get("origin", "")
+  cors_origin = "https://playimaginate.com"  # Default CORS origin
+  for allowed_origin in allowed_origins:
+    if allowed_origin in origin:
+      cors_origin = origin
+      break
+  headers = {
+    "Access-Control-Allow-Origin": cors_origin,
+    "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
+    "Access-Control-Allow-Methods": "GET,OPTIONS",
+  }
   if (
     event
     and "queryStringParameters" in event
     and event["queryStringParameters"]
     and "day" in event["queryStringParameters"]
   ):
-    return images_by_date(event["queryStringParameters"]["day"])
+    result = images_by_date(event["queryStringParameters"]["day"])
+    result["headers"] = headers
+    return result
   else:
     return {
       "statusCode": HTTPStatus.BAD_REQUEST,
