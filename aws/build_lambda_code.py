@@ -34,23 +34,35 @@ conn_uri = os.environ.get('MONGO_TOKEN')
 client = MongoClient(conn_uri)
 db = client[db_name]
 fs = GridFS(db)
-headers = {{
-    'Access-Control-Allow-Origin': '{FRONTEND_URL}',
-    'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
-    'Access-Control-Allow-Methods': 'GET,OPTIONS'
-}}
+allowed_origins = [
+    "vermillion-biscuit-931b88.netlify.app"
+]
 """
-LAMBDA_FUNC = """def handler(event, context):
+LAMBDA_FUNC = f"""def handler(event, context):
+    print("Headers:", event['headers'])
+    origin = event['headers'].get('origin', '')
+    cors_origin = "{FRONTEND_URL}" # Default CORS origin
+    for allowed_origin in allowed_origins:
+        if allowed_origin in origin:
+            cors_origin = origin
+            break
+    headers = {{
+        'Access-Control-Allow-Origin': cors_origin,
+        'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+        'Access-Control-Allow-Methods': 'GET,OPTIONS'
+    }}
     if event and 'queryStringParameters' in event and event['queryStringParameters'] and 'day' in event['queryStringParameters']:
-        return images_by_date(event['queryStringParameters']['day'])
+        result = images_by_date(event['queryStringParameters']['day'])
+        result['headers'] = headers
+        return result
     else:
-        return {'statusCode': HTTPStatus.BAD_REQUEST, 'body': json.dumps('Invalid date'), 'headers': headers}
+        return {{'statusCode': HTTPStatus.BAD_REQUEST, 'body': json.dumps('Invalid date'), 'headers': headers}}
 """
 LAMBDA_SUBS = {
-  "abort\\(HTTPStatus.BAD_REQUEST": "return {'statusCode': HTTPStatus.BAD_REQUEST, 'body': json.dumps('Invalid date'), 'headers': headers}",
-  "abort\\(HTTPStatus.NOT_FOUND": "return {'statusCode': HTTPStatus.NOT_FOUND, 'body': json.dumps('Empty database'), 'headers': headers}",
+  "abort\\(HTTPStatus.BAD_REQUEST": "return {'statusCode': HTTPStatus.BAD_REQUEST, 'body': json.dumps('Invalid date')}",
+  "abort\\(HTTPStatus.NOT_FOUND": "return {'statusCode': HTTPStatus.NOT_FOUND, 'body': json.dumps('Empty database')}",
   "@bp.route": "",  # Remove function decorator entirely
-  "return jsonify": "return {'statusCode': HTTPStatus.OK, 'body': json.dumps(out), 'headers': headers}",
+  "return jsonify": "return {'statusCode': HTTPStatus.OK, 'body': json.dumps(out)}",
 }
 
 
