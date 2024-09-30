@@ -10,23 +10,10 @@ Parameters:
 Resources:
   devUser:
     Type: AWS::IAM::User
-    DependsOn:
-      - devUserSecret
     Properties:
       UserName: !Ref devUserName
-      LoginProfile:
-        Password: !Sub '{{resolve:secretsmanager:${devUserName}Password}}'
-        PasswordResetRequired: false
-
-  devUserSecret:
-    Type: AWS::SecretsManager::Secret
-    Properties:
-      Name: !Sub ${devUserName}Password
-      GenerateSecretString:
-        PasswordLength: 32
-        ExcludeCharacters: '"@/\'
-        IncludeSpace: false
-        RequireEachIncludedType: true
+      # Login profile is configured manually after stack creation to avoid the use of AWS Secrets Manager
+      # See SETUP.md for a guide!
 
   lambdaFullAccessRole:
     Type: AWS::IAM::Role
