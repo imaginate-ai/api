@@ -44,7 +44,7 @@ def upload():
     request.form.get("theme"),
     request.form.get("real"),
   )
-  status = ImageStatus.UNVERIFIED.value
+  status = ImageStatus(request.form.get("status", ImageStatus.UNVERIFIED)).value
   _id = fs.put(
     file.stream.read(),
     filename=file.filename,
@@ -107,6 +107,31 @@ def verification_portal():
         base64_data = base64.b64encode(data).decode('ascii')
         return render_template('verification_portal.html', id=obj['_id'], img_found=True, img_src=base64_data, obj_data=obj)
     return render_template('verification_portal.html', img_found=False)
+
+@bp.route("/all-images", methods=["GET"])
+def get_all_images():
+    try:
+        # Fetch all images from GridFS using an empty query
+        images = fs.find({})
+
+        # Prepare a list to store image metadata
+        image_list = []
+
+        for image in images:
+            image_info = {
+                "filename": image.filename,
+                "date": image.date,
+                "theme": image.theme,
+                "real": image.real,
+                "status": image.status,
+            }
+            image_list.append(image_info)
+
+        # Return the list of images in JSON format
+        return jsonify(image_list), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @bp.route("/update-status", methods=["POST"])
 def update_status():
