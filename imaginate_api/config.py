@@ -22,3 +22,5 @@ class Config:
   PEXELS_TOKEN = os.getenv("PEXELS_TOKEN")
   DB_ENV = get_db_env()
   TESTING = False
+  CACHE_TYPE = 'RedisCache'
+  CACHE_REDIS_URL = os.getenv("REDIS_URL")
