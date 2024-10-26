@@ -39,4 +39,8 @@ def handle_exception(exc: HTTPException):
 
 # Run app on invocation
 if __name__ == "__main__":
-  app.run()
+  if Config.DB_ENV == 'prod':
+    from waitress import serve
+    serve(app, host="0.0.0.0", port=8080)
+  else:
+    app.run()
