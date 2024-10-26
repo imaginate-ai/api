@@ -18,3 +18,6 @@ lint:
 test:
 	@echo Running tests
 	@poetry run pytest -v
+api:
+	@echo Running api
+	@python imaginate_api/app.py

@@ -1,8 +1,9 @@
-from flask import Blueprint, abort, jsonify
-from imaginate_api.extensions import fs
-from imaginate_api.utils import build_result, calculate_date
-from http import HTTPStatus
 from base64 import b64encode
+from flask import Blueprint, abort, jsonify
+from http import HTTPStatus
+from imaginate_api.extensions import fs, cache
+from imaginate_api.schemas.date_info import DateInfo
+from imaginate_api.utils import build_result, calculate_date
 
 bp = Blueprint("date", __name__)
 
@@ -15,6 +16,7 @@ bp = Blueprint("date", __name__)
 
 # GET /date/<day>/images: used for viewing images of a specified date
 @bp.route("/<day>/images")
+@cache.memoize(timeout=DateInfo.SECONDS_PER_DAY.value)
 def images_by_date(day):
   try:
     # This code is from GET /date/latest and is NOT internally called for aws/build_lambda_code.py

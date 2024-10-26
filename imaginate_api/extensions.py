@@ -2,6 +2,7 @@ from pymongo import MongoClient
 import gridfs
 from imaginate_api.config import Config
 import sys
+from flask_caching import Cache
 
 
 def connect_mongodb(conn_uri: str, db_name: str):
@@ -18,3 +19,4 @@ def connect_mongodb(conn_uri: str, db_name: str):
 # Setup
 print(f"Running in \"{Config.DB_ENV}\" environment")
 db, fs = connect_mongodb(Config.MONGO_TOKEN, f"imaginate_{Config.DB_ENV}")
+cache = Cache()
