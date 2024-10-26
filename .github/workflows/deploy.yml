@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+env:
+  REGION: us-central1
 jobs:
   deploy:
     name: Deploy
@@ -14,7 +16,11 @@ jobs:
         uses: "google-github-actions/auth@v2"
         with:
           credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"
-      - name: Build and Push Container Image
-        run: gcloud builds submit --region=us-central1 --tag ${{ secrets.CONTAINER_IMAGE_URL }} --project imaginate-439222
-      - name: Deploy to Google Cloud Run
-        run: gcloud run deploy imaginate-api --image ${{ secrets.CONTAINER_IMAGE_URL }}
+      - name: Configure Docker
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+      - name: Build Docker Container
+        run: docker build . -t ${{ secrets.CONTAINER_IMAGE_URL }}
+      - name: Push Docker Container to Google Cloud
+        run: docker push ${{ secrets.CONTAINER_IMAGE_URL }}
+      - name: Deploy Container to Google Cloud Run
+        run: gcloud run deploy imaginate-api --image ${{ secrets.CONTAINER_IMAGE_URL }} --region ${{ env.REGION }}
