@@ -27,7 +27,7 @@ from image_handler_client.schemas.image_info import ImageStatus
 # Mocking
 from unittest.mock import patch, MagicMock
 import mongomock  # NOTE: mongomock doesn't work well with sorting
-
+mongomock.gridfs.enable_gridfs_integration()
 
 # A struct class to convert a dictionary to a object
 # This is useful since MongoDB uses attributes and does not support dictionary keys
