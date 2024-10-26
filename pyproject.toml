@@ -13,12 +13,14 @@ python = "^3.12"
 Flask = "^2.0"
 pymongo = "^4.0"
 python-dotenv = "^0.21"
+image-handler-client = {git = "https://github.com/imaginate-ai/image-handler-client.git", rev = "v1.0.0"}
+requests = "^2.32.3"
+waitress = "^3.0.0"
+
+[tool.poetry.group.dev.dependencies]
 pre-commit = "^3.7.1"
 pytest = "^8.2.2"
 mongomock = "^4.1.2"
-setuptools = "^72.1.0"
-image-handler-client = {git = "https://github.com/imaginate-ai/image-handler-client.git", rev = "v1.0.0"}
-requests = "^2.32.3"
 
 [tool.ruff]
 exclude = []

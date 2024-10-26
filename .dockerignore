@@ -10,3 +10,4 @@ tests
 .env
 .pre-commit-config.yaml
 Makefile
+poetry.toml
