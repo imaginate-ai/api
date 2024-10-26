@@ -1,0 +1,12 @@
+.github
+.git
+.gitignore
+.dockerignore
+Dockerfile
+.ruff_cache
+.venv
+aws
+tests
+.env
+.pre-commit-config.yaml
+Makefile
