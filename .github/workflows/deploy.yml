@@ -7,7 +7,7 @@ on:
 env:
   REGION: us-central1
 jobs:
-  deploy-container:
+  deploy:
     name: Deploy Containerized App
     runs-on: ubuntu-latest
     steps:
@@ -24,17 +24,8 @@ jobs:
         run: docker push ${{ secrets.CONTAINER_IMAGE_URL }}
       - name: Deploy Container to Google Cloud Run
         run: gcloud run deploy imaginate-api --image ${{ secrets.CONTAINER_IMAGE_URL }} --region ${{ env.REGION }}
-  deploy-api:
-    name: Deploy API
-    runs-on: ubuntu-latest
-    needs: deploy-container
-    steps:
       - name: Add API Url to API Spec
         run: python scripts/add_api_url.py openapi.yml ${{ secrets.API_URL }}
       - uses: actions/checkout@v4
-      - name: Authenticate to Google Cloud
-        uses: "google-github-actions/auth@v2"
-        with:
-          credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"
       - name: Create and Deploy API-Config
         run: gcloud api-gateway api-configs create api-config --api=api --openapi-spec=openapi.yml
