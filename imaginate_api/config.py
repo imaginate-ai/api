@@ -29,9 +29,12 @@ class Config:
       "token_url": "https://accounts.google.com/o/oauth2/token",
       "user_info": {
         "url": "https://www.googleapis.com/oauth2/v3/userinfo",
-        "data": lambda json: {"email": json["email"]},
+        "data": lambda json: {"email": json["email"], "id": json["sub"]},
       },
       "scopes": ["https://www.googleapis.com/auth/userinfo.email"],
     }
   }
+  BASE_URL = (
+    "https://playimaginate.com" if DB_ENV == "prod" else "http://127.0.0.1:5000"
+  )
   TESTING = False

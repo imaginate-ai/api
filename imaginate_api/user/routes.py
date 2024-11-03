@@ -7,14 +7,13 @@ import secrets
 import requests
 
 bp = Blueprint("user", __name__)
-reroute_url = "index"  # Currently set to index, but will be changed to imaginate home page in the future
 
 
 # Initiates the authorization process with the specified provider
 @bp.route("/authorize/<provider>")
 def user_authorize(provider):
   if not current_user.is_anonymous:
-    return redirect(url_for("index"))
+    return redirect(current_app.config["BASE_URL"])
 
   provider_data = current_app.config["AUTH_PROVIDERS"].get(provider)
   if not provider_data:
@@ -24,7 +23,6 @@ def user_authorize(provider):
     )
 
   session["oauth_state"] = secrets.token_urlsafe(32)
-  print(url_for("user.user_callback", provider=provider, _external=True))
   query = urlencode(
     {
       "client_id": provider_data["client_id"],
@@ -42,7 +40,7 @@ def user_authorize(provider):
 @bp.route("/callback/<provider>")
 def user_callback(provider):
   if not current_user.is_anonymous:
-    return redirect(url_for("index"))
+    return redirect(current_app.config["BASE_URL"])
 
   provider_data = current_app.config["AUTH_PROVIDERS"].get(provider)
   if not provider_data:
@@ -91,9 +89,9 @@ def user_callback(provider):
 
   # Login user and map requested data
   user_data = provider_data["user_info"]["data"](response.json())
-  user = User.find_or_create_user(user_data)
+  user = User.find_or_create_user(user_data, provider)
   success = login_user(user)
   if success:
     user.authenticate_user()
 
-  return redirect(url_for("index"))
+  return redirect(current_app.config["BASE_URL"])

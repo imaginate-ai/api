@@ -22,7 +22,7 @@ class User(UserMixin):
 
   @property
   def is_anonymous(self):
-    return True  # Always return True based on spec
+    return False  # Always return False based on specification
 
   def get_id(self):
     return str(self.user_data["_id"])
@@ -37,15 +37,27 @@ class User(UserMixin):
     COLLECTION.update_one({"_id": self.user_data["_id"]}, {"$set": {"active": False}})
     self.user_data["active"] = False
 
-  # Create or find user by data -> email
   @classmethod
-  def find_or_create_user(cls, data):
+  def find_or_create_user(cls, data, provider=None):
+    # Primary identifier: Try to find the existing user by using the unique ID from the provider
+    if provider:
+      existing_user = COLLECTION.find_one({f"{provider}_id": data["id"]})
+      if existing_user:
+        return User(user_data=existing_user)
+
+    # Secondary identifier: Try to find the existing user by using the email from the provider
     existing_user = COLLECTION.find_one({"email": data["email"]})
     if existing_user:
+      if provider:
+        COLLECTION.update_one(
+          {"_id": existing_user["_id"]}, {"$set": {f"{provider}_id": data["id"]}}
+        )
       return User(user_data=existing_user)
 
+    # If no user is found, create a new one
     data["authenticated"] = False
     data["active"] = True
+    data[f"{provider}_id"] = data.pop("id")
     new_user = COLLECTION.insert_one(data)
     return User.get(new_user.inserted_id)
 
