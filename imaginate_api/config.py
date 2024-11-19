@@ -35,6 +35,6 @@ class Config:
     }
   }
   BASE_URL = (
-    "https://playimaginate.com" if DB_ENV == "prod" else "http://127.0.0.1:5000"
+    "https://playimaginate.com" if DB_ENV == "prod" else "http://localhost:5173"
   )
   TESTING = False

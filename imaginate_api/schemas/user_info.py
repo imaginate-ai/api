@@ -27,6 +27,11 @@ class User(UserMixin):
   def get_id(self):
     return str(self.user_data["_id"])
 
+  def get_clientside_data(self):
+    return {
+      "email": self.user_data.get("email"),
+    }
+
   def authenticate_user(self):
     COLLECTION.update_one(
       {"_id": self.user_data["_id"]}, {"$set": {"authenticated": True}}

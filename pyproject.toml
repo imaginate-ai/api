@@ -18,6 +18,7 @@ requests = "^2.32.3"
 waitress = "^3.0.0"
 setuptools = "^75.2.0"
 flask-login = "^0.6.3"
+flask-cors = "^5.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.7.1"

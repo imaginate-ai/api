@@ -13,7 +13,7 @@ bp = Blueprint("user", __name__)
 @bp.route("/authorize/<provider>")
 def user_authorize(provider):
   if not current_user.is_anonymous:
-    return redirect(current_app.config["BASE_URL"])
+    return redirect(f'{current_app.config["BASE_URL"]}/?{urlencode(current_user.get_clientside_data())}')
 
   provider_data = current_app.config["AUTH_PROVIDERS"].get(provider)
   if not provider_data:
@@ -93,5 +93,6 @@ def user_callback(provider):
   success = login_user(user)
   if success:
     user.authenticate_user()
+    return redirect(f'{current_app.config["BASE_URL"]}/?{urlencode(user.get_clientside_data())}')
 
   return redirect(current_app.config["BASE_URL"])

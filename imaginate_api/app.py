@@ -1,4 +1,5 @@
 from flask import Flask, json, render_template
+from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
 from imaginate_api.date.routes import bp as date_routes
 from imaginate_api.image.routes import bp as image_routes
@@ -10,6 +11,7 @@ import os
 
 def create_app():
   app = Flask(__name__)
+  CORS(app)
   app.config.from_object(Config)
   login_manager.init_app(app)
   app.secret_key = os.getenv("FLASK_SECRET_KEY")
