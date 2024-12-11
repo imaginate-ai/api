@@ -21,4 +21,20 @@ class Config:
   MONGO_TOKEN = os.getenv("MONGO_TOKEN")
   PEXELS_TOKEN = os.getenv("PEXELS_TOKEN")
   DB_ENV = get_db_env()
+  AUTH_PROVIDERS = {
+    "google": {
+      "client_id": os.getenv("GOOGLE_CLIENT_ID"),
+      "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
+      "authorize_url": "https://accounts.google.com/o/oauth2/auth",
+      "token_url": "https://accounts.google.com/o/oauth2/token",
+      "user_info": {
+        "url": "https://www.googleapis.com/oauth2/v3/userinfo",
+        "data": lambda json: {"email": json["email"], "id": json["sub"]},
+      },
+      "scopes": ["https://www.googleapis.com/auth/userinfo.email"],
+    }
+  }
+  BASE_URL = (
+    "https://playimaginate.com" if DB_ENV == "prod" else "http://localhost:5173"
+  )
   TESTING = False
