@@ -26,7 +26,7 @@ def user_authorize(provider):
   query = urlencode(
     {
       "client_id": provider_data["client_id"],
-      "redirect_uri": url_for("user.user_callback", provider=provider, _external=True),
+      "redirect_uri": url_for("user.user_callback", provider=provider, _external=True, _scheme='https'),
       "response_type": "code",  # This tells the OAuth provider that we expect an authorization code to be returned
       "scope": " ".join(provider_data["scopes"]),
       "state": session["oauth_state"],
