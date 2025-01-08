@@ -18,6 +18,7 @@ def get_db_env():
     choice = input("You are about to connect to the production database. Enter 'y' to continue...")
     if choice != "y":
       sys.exit(1)
+
   return env.lower()
 
 
