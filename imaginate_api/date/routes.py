@@ -53,3 +53,31 @@ def latest_date():
   if not res:
     abort(HTTPStatus.NOT_FOUND, description="Empty database")
   return jsonify({"date": res.date})
+
+
+@bp.route("/delete-rejected/<day>", methods=["DELETE"])
+def delete_rejected_by_day(day):
+    if not day:
+        return jsonify({"error": "Date is required"}), HTTPStatus.BAD_REQUEST
+
+    try:
+        # Convert the provided day into the expected date format
+        date = calculate_date(day)
+
+        # Query the GridFS to find all rejected images for the given date
+        images_to_delete = fs.find({"date": date, "status": "rejected"})
+
+        deleted_count = 0
+        for image in images_to_delete:
+            fs.delete(image._id)
+            deleted_count += 1
+
+        if deleted_count == 0:
+            return jsonify({"message": "No rejected images found for the given date."}), HTTPStatus.NOT_FOUND
+
+        return jsonify({
+            "message": f"Deleted {deleted_count} rejected images from the date '{date}'."
+        }), HTTPStatus.OK
+    except Exception as e:
+        return jsonify({"error": str(e)}), HTTPStatus.INTERNAL_SERVER_ERROR
+
