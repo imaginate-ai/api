@@ -124,7 +124,7 @@ def calculate_date(day: str | int | None, db=None, latest_day=None):
       # Check if the date requested exists regardless of cycle
       document = db['days'].find_one({"day": day})
       if document:
-        print(f"Day for date exists, Circular date ignored")
+        print("Day for date exists, Circular date ignored")
         return timestamp_day
 
       # Check for days that have not been shown yet
@@ -144,7 +144,7 @@ def calculate_date(day: str | int | None, db=None, latest_day=None):
       )
 
       if(new_day):
-        print(f"New content found, returning date")
+        print("New content found, returning date")
         return new_day['_id']
 
     MIN = DateInfo.START_DATE.value
