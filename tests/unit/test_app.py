@@ -143,12 +143,20 @@ def test_build_result():
     ([0], DateInfo.START_DATE.value),
     (["3"], DateInfo.START_DATE.value + 3 * DateInfo.SECONDS_PER_DAY.value),
     ([DateInfo.START_DATE.value + 123], DateInfo.START_DATE.value + 123),
-    ([DateInfo.START_DATE.value, DateInfo.START_DATE.value], DateInfo.START_DATE.value),
+    (
+      [
+        DateInfo.START_DATE.value, 
+        None, # db param
+        DateInfo.START_DATE.value
+      ], 
+      DateInfo.START_DATE.value
+    ),
     # Range of [0, 4] -> 5 possible dates, therefore every date will circle back to itself 5 days apart
     # Explanation for example below: 14 - 5 = 9 -> 9 - 5 = 4; therefore this timestamp will map to the same result as day = 4, 9, 14, 19, ...
     (
       [
         DateInfo.START_DATE.value + 14 * DateInfo.SECONDS_PER_DAY.value,
+        None, # db param
         DateInfo.START_DATE.value + 4 * DateInfo.SECONDS_PER_DAY.value,
       ],
       DateInfo.START_DATE.value + 4 * DateInfo.SECONDS_PER_DAY.value,
