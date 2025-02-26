@@ -103,7 +103,7 @@ def build_image_from_url(url):
 
 # Helper function that returns a timestamp as an integer, where day is a timestamp or day number
 # WARNING: Do not enter a timestamp BEFORE September 1st 2024
-def calculate_date(day: str | int | None, latest_day=None):
+def calculate_date(day: str | int | None, db=None, latest_day=None):
   if day is not None:
     print(f"Inputted day is: {day}")
     if isinstance(day, str):
@@ -118,6 +118,34 @@ def calculate_date(day: str | int | None, latest_day=None):
     # Check if circular behaviour was requested
     if latest_day is None:
       return timestamp_day
+
+    if db is not None:
+
+      # Check if the date requested exists regardless of cycle
+      document = db['days'].find_one({"day": day})
+      if document:
+        print(f"Day for date exists, Circular date ignored")
+        return timestamp_day
+
+      # Check for days that have not been shown yet
+      new_day = db['days'].find_one_and_update({
+        # Find days that have not appeared yet, or appeared today
+          "$or": [
+          {"appearances": {"$size": 0}},
+          {"appearances": {"$elemMatch": {"$eq": timestamp_day}}},
+          {"appearances": {"$exists": False}}
+          ]
+        },
+        # Add the current date to the appearances array
+        {
+          "$addToSet": {"appearances": timestamp_day},
+        },
+        return_document=True,
+      )
+
+      if(new_day):
+        print(f"New content found, returning date")
+        return new_day['_id']
 
     MIN = DateInfo.START_DATE.value
     MAX = latest_day + DateInfo.SECONDS_PER_DAY.value
